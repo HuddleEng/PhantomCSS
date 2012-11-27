@@ -4,7 +4,7 @@ var _root = '.';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _emptyPageToRunTestsOn; // what will this be then?
+var _emptyPageToRunTestsOn;
 var _libraryRoot = '.';
 
 exports.screenshot = screenshot;
@@ -12,19 +12,25 @@ exports.compareAll = compareAll;
 exports.init = init;
 
 function init(options){
-
 	_emptyPageToRunTestsOn = options.testRunnerUrl;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
-	_fileNameGetter = options._fileNameGetter || _fileNameGetter;
+	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
+	_report = options.report || _report;
 }
 
 function _fileNameGetter(){
-	return _root + "/screenshot_" + _count++;
+	var name = _root + "/screenshot_" + _count++;
+
+	if(fs.isFile(name+'.png')){
+		return name+'.diff.png';
+	} else {
+		return name+'.png';
+	}
+
 }
 
 function screenshot(selector, timeToWait, hideSelector){
-
 	casper.wait(timeToWait || 250, function(){
 
 		if(hideSelector){
@@ -35,7 +41,8 @@ function screenshot(selector, timeToWait, hideSelector){
 			});
 		}
 
-		casper.captureSelector( _fileNameGetter() , selector);
+		casper.captureSelector( _fileNameGetter(_root) , selector);
+		
 	}); // give a bit of time for all the images appear
 }
 
@@ -94,66 +101,42 @@ function getDiffs (path){
 	_realPath = _realPath.replace(fs.separator + path, '');
 }
 
-
 function compareAll(){
-	var failures = [];
-	var missingBaseFiles = [];
-	var haveDoneCount = 0;
+	var tests = [];
+	var fails = 0;
+	var errors = 0;
 
 	getDiffs(_root);
 
 	_diffsToProcess.forEach(function(file){
 		var baseFile = file.replace('.diff', '');
+		var test = {
+			filename: baseFile
+		};
 
 		if(!fs.isFile(baseFile)) {
-			missingBaseFiles.push(baseFile);
-			haveDoneCount++;
+			test.error = true;
+			errors++;
+			tests.push(test);
 		} else {
-
 			casper.
 			thenOpen (_emptyPageToRunTestsOn, function (){
 				asyncCompare(baseFile, file, function(isSame){
-					haveDoneCount++;
 					if(!isSame){
-						failures.push(file);
+						test.fail = true;
+						fails++;
 					}
+					tests.push(test);
 				});
 			});
 		}
 	});
 
 	casper.then(function(){
-
 		casper.waitFor(function(){
-			return _diffsToProcess.length === haveDoneCount;
+			return _diffsToProcess.length === tests.length;
 		}, function(){
-
-			var failedComparisonReport = '';
-			var missingFilesReport = '';
-			if(failures.length || missingBaseFiles.length){
-				
-				failures.forEach(function(file){
-					failedComparisonReport += file + '\n';
-				});
-
-				if (failures.length) {
-					casper.test.fail('\n\n****\nOh noes! Visual regression check has failed, you\'ll have to manually compare the following diffs to see what has changed.\n\n' + failedComparisonReport + '\n****\n');
-				}
-
-				missingBaseFiles.forEach(function(file) {
-					missingFilesReport += file + '\n';
-				});
-
-				if (missingBaseFiles.length) {
-					casper.test.fail('\n\n****\nAww snap, yo! Someone forgot to commit a base file for visual regression so it\'s all gone tits-up. These are the files I couldn\'t find :(\n\n' + missingFilesReport + '\n****\n\nPROTIP: Delete the diffs for the missing files and re-run the tests to generate new base files!');
-				}
-
-				failures = [];
-				missingFilesReport = [];
-			} else {
-				casper.test.pass('\n\n****\nBrilliant, it all looks as I expected it to, you are awesome!\n****\n');
-			}
-
+			_report(tests, fails, errors);
 		});
 	});
 }
@@ -215,4 +198,30 @@ function initClient(){
 	}, {
 		_tolerance: _tolerance
 	});
+}
+
+
+function _report(tests, noOfFails, noOfErrors){
+
+	if( tests.length === 0){
+		console.log("\nMust be your first time?");
+		console.log("Some screenshots have been generated in the directory " + _root);
+		console.log("This is your 'baseline', check the images manually. If they're wrong, delete the images.");
+		console.log("The next time you run these tests, new screenshots will be taken.  These screenshots will be compared to the original.");
+		console.log('If they are different, PhantomCSS will report a failure.');
+	} else {
+		
+		console.log("\nPhantomCSS found: " + tests.length + " tests.");
+		
+		if(noOfFails === 0){
+			console.log("None of them failed. Which is good right?");
+			console.log("If you want to make them fail, go change some CSS - weirdo.");
+		} else {
+			console.log(noOfFails + ' of them failed.');
+		}
+
+		if(noOfErrors !== 0){
+			console.log("There were " + noOfErrors + "errors.  Is it possible that a baseline image was deleted but not the diff?");
+		}
+	}
 }
