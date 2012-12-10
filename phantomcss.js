@@ -6,10 +6,12 @@ var _realPath;
 var _diffsToProcess = [];
 var _emptyPageToRunTestsOn;
 var _libraryRoot = '.';
+var exitStatus;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
 exports.init = init;
+exports.getExitStatus = getExitStatus;
 
 function init(options){
 	_emptyPageToRunTestsOn = options.testRunnerUrl;
@@ -223,5 +225,11 @@ function _report(tests, noOfFails, noOfErrors){
 		if(noOfErrors !== 0){
 			console.log("There were " + noOfErrors + "errors.  Is it possible that a baseline image was deleted but not the diff?");
 		}
+
+		exitStatus = noOfErrors+noOfFails;
 	}
+}
+
+function getExitStatus() {
+	return exitStatus;
 }
