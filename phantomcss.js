@@ -14,6 +14,9 @@ exports.init = init;
 exports.getExitStatus = getExitStatus;
 
 function init(options){
+	if(typeof casper === "undefined") {
+		casper = options.casper || {};
+	}
 	_emptyPageToRunTestsOn = options.testRunnerUrl;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
