@@ -34,7 +34,7 @@ casper.
 	}).
 	run( function end_it(){
 		console.log('\nTHE END.');
-		phantom.exit();
+		phantom.exit(css.getExitStatus());
 	});
 
 
