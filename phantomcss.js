@@ -42,7 +42,7 @@ function screenshot(selector, timeToWait, hideSelector){
 			casper.evaluate(function(s){
 				$(s).css('visibility', 'hidden');
 			}, {
-				s: selector + ' ' + hideSelector
+				s: hideSelector
 			});
 		}
 
