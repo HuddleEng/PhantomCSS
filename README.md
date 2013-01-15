@@ -15,7 +15,7 @@ PhantomCSS can only work when UI is predictable. It's possible to hide mutable U
 
 ### Example
 
-Check out the [demo](/Huddle/PhantomCSS/tree/master/demo) for a full working example.
+Check out the [demo](/Huddle/PhantomCSS/tree/master/demo) for a full working example (run `phantomjs demo/testsuite.js` from the command line).
 
 ```javascript
 
