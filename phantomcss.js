@@ -1,16 +1,26 @@
+/*
+Author: James Cryer
+Company: Huddle
+Last updated date: 21 Feb 2013
+URL: https://github.com/Huddle/PhantomCSS
+*/
+
 var fs = require('fs');
-var _tolerance = 64;
+
 var _root = '.';
+var _diffRoot = '.';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
 var _emptyPageToRunTestsOn;
 var _libraryRoot = '.';
 var exitStatus;
+var _hideElements;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
 exports.init = init;
+exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
 
 function init(options){
@@ -18,8 +28,32 @@ function init(options){
 	_emptyPageToRunTestsOn = options.testRunnerUrl;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
+	_diffRoot = options.failedComparisonsRoot || _diffRoot;
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
-	_report = options.report || _report;
+	
+	_onPass = options.onPass || _onPass;
+	_onFail = options.onFail || _onFail;
+	_onTimeout = options.onTimeout || _onTimeout;
+	_onComplete = options.onComplete || options.report || _onComplete;
+
+	_hideElements = options.hideElements;
+}
+
+function turnOffAnimations(){
+	console.log('Turning off animations');
+	casper.evaluate(function turnOffAnimations(){
+		window.addEventListener('load', function(){
+
+			var css = document.createElement("style");
+			css.type = "text/css";
+			css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; }";
+			document.body.appendChild(css);
+
+			if(jQuery){
+				$.fx.off = true;
+			}
+		},false);
+	});
 }
 
 function _fileNameGetter(){
@@ -30,21 +64,30 @@ function _fileNameGetter(){
 	} else {
 		return name+'.png';
 	}
-
 }
 
-function screenshot(selector, timeToWait, hideSelector){
+function screenshot(selector, timeToWait, hideSelector, fileName){
+	casper.captureBase64('png'); // force pre-render
 	casper.wait(timeToWait || 250, function(){
 
-		if(hideSelector){
-			casper.evaluate(function(s){
-				$(s).css('visibility', 'hidden');
+		if(hideSelector || _hideElements){
+			casper.evaluate(function(s1, s2){
+				if(s1){
+					$(s1).css('visibility', 'hidden');
+				}
+				$(s2).css('visibility', 'hidden');
 			}, {
-				s: hideSelector
+				s1: _hideElements,
+				s2: hideSelector
 			});
 		}
 
-		casper.captureSelector( _fileNameGetter(_root) , selector);
+		try{
+			casper.captureSelector( _fileNameGetter(_root, fileName) , selector);
+		}
+		catch(ex){
+			console.log("Screenshot FAILED: " + ex.message);
+		}
 		
 	}); // give a bit of time for all the images appear
 }
@@ -60,7 +103,11 @@ function asyncCompare(one, two, func){
 		'two': two
 	});
 
-	casper.evaluate(function(){window._imagediff_.run();});
+	casper.evaluate(function(filename){
+		window._imagediff_.run(filename);
+	}, {
+		label: one
+	});
 
 	casper.waitFor(
 		function check() {
@@ -70,12 +117,20 @@ function asyncCompare(one, two, func){
 		},
 		function () {
 	
-			var isSame = casper.evaluate(function(){
+			var mismatch = casper.evaluate(function(){
 				return window._imagediff_.getResult();
 			});
 
-			func(isSame);
-		}
+			if(Number(mismatch)){
+				func(false, mismatch);
+			} else {
+				func(true);
+			}
+
+		}, function(){
+			func(false);
+		},
+		10000
 	);
 }
 
@@ -124,11 +179,51 @@ function compareAll(){
 		} else {
 			casper.
 			thenOpen (_emptyPageToRunTestsOn, function (){
-				asyncCompare(baseFile, file, function(isSame){
+				asyncCompare(baseFile, file, function(isSame, mismatch){
+					
 					if(!isSame){
+
 						test.fail = true;
 						fails++;
+
+						if(mismatch){
+							test.mismatch = mismatch;
+							_onFail(test);
+						} else {
+							_onTimeout(test);
+						}
+
+						casper.waitFor(
+							function check() {
+								return casper.evaluate(function(){
+									return window._imagediff_.hasImage;
+								});
+							},
+							function () {
+
+								var failFile = _diffRoot + "/" + file.split("\\").pop().replace('.diff.png', '');
+								var safeFileName = failFile;
+								var increment = 0;
+
+								while ( fs.isFile(safeFileName+'.fail.png') ){
+									increment++;
+									safeFileName = failFile+'.'+increment;
+								}
+
+								failFile = safeFileName + '.fail.png';
+
+								casper.evaluate(function(){
+									window._imagediff_.hasImage = false;
+								});
+
+								casper.captureSelector(failFile, 'img');
+							}, function(){},
+							10000
+						);
+					} else {
+						_onPass(test);
 					}
+
 					tests.push(test);
 				});
 			});
@@ -139,72 +234,80 @@ function compareAll(){
 		casper.waitFor(function(){
 			return _diffsToProcess.length === tests.length;
 		}, function(){
-			_report(tests, fails, errors);
-		});
+			_onComplete(tests, fails, errors);
+		}, function(){},
+		10000);
 	});
 }
 
 function initClient(){
-	
-	casper.page.injectJs(_libraryRoot+'/imagediff.js');
 
-	casper.evaluate(function(_tolerance){
+	casper.page.injectJs(_libraryRoot+'/resemble.js');
+
+	casper.evaluate(function(){
 		
 		var result;
 
-		var compare = function firstCompare(one){
-			compare = function secondCompare(two){
-				result = imagediff.equal(one, two, _tolerance); // 0 = no tolerance 100 is too much.
-				window._imagediff_.hasResult = true;
-				compare = firstCompare;
-			};
-		};
-
 		var div = document.createElement('div');
-
-		function getImageData(e) {
-			var image = new Image();
-			image.onload = function(){
-				compare( image );
-			};
-			image.src = e.target.result;
-		}
 
 		// this is a bit of hack, need to get images into browser for analysis
 		div.style = "display:block;position:absolute;border:0;top:-1px;left:-1px;height:1px;width:1px;overflow:hidden;";
 		div.innerHTML = '<form id="image-diff">'+
 			'<input type="file" id="image-diff-one" name="one"/>'+
 			'<input type="file" id="image-diff-two" name="two"/>'+
-		'</form>';
+		'</form><div id="image-diff"></div>';
 		document.body.appendChild(div);
 
 		window._imagediff_ = {
 			hasResult: false,
+			hasImage: false,
 			run: run,
 			getResult: function(){
 				window._imagediff_.hasResult = false;
-				console.log('THE RESULT IS ', result);
 				return result;
 			}
 		};
 
-		function run(){
-			var reader1 = new FileReader();
-			var reader2 = new FileReader();
+		function run(label){
 
-			reader1.onload = getImageData;
-			reader2.onload = getImageData;
+			function render(data){
+				document.getElementById('image-diff').innerHTML = '<img src="'+data.getImageDataUrl(label)+'"/>';
+				window._imagediff_.hasImage = true;
+			}
 
-			reader1.readAsDataURL(document.getElementById('image-diff-one').files[0]);
-			reader2.readAsDataURL(document.getElementById('image-diff-two').files[0]);
+			resemble(document.getElementById('image-diff-one').files[0]).
+				compareTo(document.getElementById('image-diff-two').files[0]).
+				ignoreAntialiasing(). // <-- muy importante
+				onComplete(function(data){
+					var diffImage;
+
+					if(Number(data.misMatchPercentage) > 0.05){
+						result = data.misMatchPercentage;
+					} else {
+						result = false;
+					}
+
+					window._imagediff_.hasResult = true;
+
+					if(Number(data.misMatchPercentage) > 0.05){
+						render(data);
+					}
+					
+				});
 		}
-	}, {
-		_tolerance: _tolerance
 	});
 }
 
-
-function _report(tests, noOfFails, noOfErrors){
+function _onPass(test){
+	// console.log('.'); just for progress indication
+}
+function _onFail(test){
+	console.log('FAILED: ('+test.mismatch+'% mismatch)', test.filename, '\n');
+}
+function _onTimeout(test){
+	console.log('TIMEOUT: ', test.filename, '\n');
+}
+function _onComplete(tests, noOfFails, noOfErrors){
 
 	if( tests.length === 0){
 		console.log("\nMust be your first time?");
@@ -221,6 +324,7 @@ function _report(tests, noOfFails, noOfErrors){
 			console.log("If you want to make them fail, go change some CSS - weirdo.");
 		} else {
 			console.log(noOfFails + ' of them failed.');
+			console.log('PhantomCSS has created some images that try to show the difference (in the directory '+_diffRoot+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
 		}
 
 		if(noOfErrors !== 0){

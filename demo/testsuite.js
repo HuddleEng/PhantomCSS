@@ -15,6 +15,7 @@ var url = initPageOnServer('demo/testpage.html');
 
 css.init({
 	screenshotRoot: './screenshots',
+	failedComparisonsRoot: './failures',
 	testRunnerUrl: url.emptyPage
 });
 

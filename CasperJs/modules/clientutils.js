@@ -41,6 +41,7 @@
      * Casper client-side helpers.
      */
     exports.ClientUtils = function ClientUtils(options) {
+        /*jshint maxstatements:40*/
         // private members
         var BASE64_ENCODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         var BASE64_DECODE_CHARS = new Array(
@@ -75,6 +76,7 @@
          * @return string
          */
         this.decode = function decode(str) {
+            /*jshint maxstatements:30 maxcomplexity:30 */
             var c1, c2, c3, c4, i = 0, len = str.length, out = "";
             while (i < len) {
                 do {
@@ -116,6 +118,16 @@
         };
 
         /**
+         * Echoes something to casper console.
+         *
+         * @param  String  message
+         * @return
+         */
+        this.echo = function echo(message) {
+            console.log("[casper.echo] " + message);
+        };
+
+        /**
          * Base64 encodes a string, even binary ones. Succeeds where
          * window.btoa() fails.
          *
@@ -123,6 +135,7 @@
          * @return string
          */
         this.encode = function encode(str) {
+            /*jshint maxstatements:30 */
             var out = "", i = 0, len = str.length, c1, c2, c3;
             while (i < len) {
                 c1 = str.charCodeAt(i++) & 0xff;
@@ -183,11 +196,12 @@
         /**
          * Fills a form with provided field values, and optionnaly submits it.
          *
-         * @param  HTMLElement|String  form    A form element, or a CSS3 selector to a form element
-         * @param  Object              vals    Field values
-         * @return Object                      An object containing setting result for each field, including file uploads
+         * @param  HTMLElement|String  form  A form element, or a CSS3 selector to a form element
+         * @param  Object              vals  Field values
+         * @return Object                    An object containing setting result for each field, including file uploads
          */
         this.fill = function fill(form, vals) {
+            /*jshint maxcomplexity:8*/
             var out = {
                 errors: [],
                 fields: [],
@@ -214,7 +228,7 @@
                 }
                 var field = this.findAll('[name="' + name + '"]', form);
                 var value = vals[name];
-                if (!field) {
+                if (!field || field.length === 0) {
                     out.errors.push('no field named "' + name + '" in form');
                     continue;
                 }
@@ -226,9 +240,10 @@
                             name: name,
                             path: err.path
                         });
+                    } else if(err.name === "FieldNotFound") {
+                        out.errors.push('Form field named "' + name + '" was not found.');
                     } else {
-                        this.log(err, "error");
-                        throw err;
+                        out.errors.push(err.toString());
                     }
                 }
             }
@@ -247,7 +262,7 @@
             try {
                 var pSelector = this.processSelector(selector);
                 if (pSelector.type === 'xpath') {
-                    return this.getElementsByXPath(pSelector.path);
+                    return this.getElementsByXPath(pSelector.path, scope);
                 } else {
                     return scope.querySelectorAll(pSelector.path);
                 }
@@ -268,7 +283,7 @@
             try {
                 var pSelector = this.processSelector(selector);
                 if (pSelector.type === 'xpath') {
-                    return this.getElementByXPath(pSelector.path);
+                    return this.getElementByXPath(pSelector.path, scope);
                 } else {
                     return scope.querySelector(pSelector.path);
                 }
@@ -294,37 +309,14 @@
          * Retrieves string contents from a binary file behind an url. Silently
          * fails but log errors.
          *
-         * @param  String  url
-         * @param  String  method
-         * @param  Object  data
-         * @return string
+         * @param   String   url     Url.
+         * @param   String   method  HTTP method.
+         * @param   Object   data    Request parameters.
+         * @return  String
          */
         this.getBinary = function getBinary(url, method, data) {
             try {
-                var xhr = new XMLHttpRequest(), dataString = "";
-                if (typeof method !== "string" || ["GET", "POST"].indexOf(method.toUpperCase()) === -1) {
-                    method = "GET";
-                } else {
-                    method = method.toUpperCase();
-                }
-                xhr.open(method, url, false);
-                this.log("getBinary(): Using HTTP method: '" + method + "'", "debug");
-                xhr.overrideMimeType("text/plain; charset=x-user-defined");
-                if (method === "POST") {
-                    if (typeof data === "object") {
-                        var dataList = [];
-                        for (var k in data) {
-                            dataList.push(encodeURIComponent(k) + "=" + encodeURIComponent(data[k].toString()));
-                        }
-                        dataString = dataList.join('&');
-                        this.log("getBinary(): Using request data: '" + dataString + "'", "debug");
-                    } else if (typeof data === "string") {
-                        dataString = data;
-                    }
-                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                }
-                xhr.send(method === "POST" ? dataString : null);
-                return xhr.responseText;
+                return this.sendAJAX(url, method, data, false);
             } catch (e) {
                 if (e.name === "NETWORK_ERR" && e.code === 101) {
                     this.log("getBinary(): Unfortunately, casperjs cannot make cross domain ajax requests", "warning");
@@ -350,7 +342,9 @@
 
         /**
          * Retrieves bounding rect coordinates of the HTML element matching the
-         * provided CSS3 selector
+         * provided CSS3 selector in the following form:
+         *
+         * {top: y, left: x, width: w, height:, h}
          *
          * @param  String  selector
          * @return Object or null
@@ -370,13 +364,71 @@
         };
 
         /**
+         * Retrieves the list of bounding rect coordinates for all the HTML elements matching the
+         * provided CSS3 selector, in the following form:
+         *
+         * [{top: y, left: x, width: w, height:, h},
+         *  {top: y, left: x, width: w, height:, h},
+         *  ...]
+         *
+         * @param  String  selector
+         * @return Array
+         */
+        this.getElementsBounds = function getElementsBounds(selector) {
+            var elements = this.findAll(selector);
+            var self = this;
+            try {
+                return Array.prototype.map.call(elements, function(element) {
+                    var clipRect = element.getBoundingClientRect();
+                    return {
+                        top:    clipRect.top,
+                        left:   clipRect.left,
+                        width:  clipRect.width,
+                        height: clipRect.height
+                    };
+                });
+            } catch (e) {
+                this.log("Unable to fetch bounds for elements matching " + selector, "warning");
+            }
+        };
+
+        /**
+         * Retrieves information about the node matching the provided selector.
+         *
+         * @param  String|Object  selector  CSS3/XPath selector
+         * @return Object
+         */
+        this.getElementInfo = function getElementInfo(selector) {
+            var element = this.findOne(selector);
+            var bounds = this.getElementBounds(selector);
+            var attributes = {};
+            [].forEach.call(element.attributes, function(attr) {
+                attributes[attr.name.toLowerCase()] = attr.value;
+            });
+            return {
+                nodeName: element.nodeName.toLowerCase(),
+                attributes: attributes,
+                tag: element.outerHTML,
+                html: element.innerHTML,
+                text: element.innerText,
+                x: bounds.left,
+                y: bounds.top,
+                width: bounds.width,
+                height: bounds.height,
+                visible: this.visible(selector)
+            };
+        };
+
+        /**
          * Retrieves a single DOM element matching a given XPath expression.
          *
-         * @param  String  expression  The XPath expression
+         * @param  String            expression  The XPath expression
+         * @param  HTMLElement|null  scope       Element to search child elements within
          * @return HTMLElement or null
          */
-        this.getElementByXPath = function getElementByXPath(expression) {
-            var a = document.evaluate(expression, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        this.getElementByXPath = function getElementByXPath(expression, scope) {
+            scope = scope || this.options.scope;
+            var a = document.evaluate(expression, scope, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
             if (a.snapshotLength > 0) {
                 return a.snapshotItem(0);
             }
@@ -385,16 +437,85 @@
         /**
          * Retrieves all DOM elements matching a given XPath expression.
          *
-         * @param  String  expression  The XPath expression
+         * @param  String            expression  The XPath expression
+         * @param  HTMLElement|null  scope       Element to search child elements within
          * @return Array
          */
-        this.getElementsByXPath = function getElementsByXPath(expression) {
+        this.getElementsByXPath = function getElementsByXPath(expression, scope) {
+            scope = scope || this.options.scope;
             var nodes = [];
-            var a = document.evaluate(expression, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            var a = document.evaluate(expression, scope, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
             for (var i = 0; i < a.snapshotLength; i++) {
                 nodes.push(a.snapshotItem(i));
             }
             return nodes;
+        };
+
+        /**
+         * Retrieves the value of a form field.
+         *
+         * @param  String  inputName  The for input name attr value
+         * @return Mixed
+         */
+        this.getFieldValue = function getFieldValue(inputName) {
+            function getSingleValue(input) {
+                try {
+                    type = input.getAttribute('type').toLowerCase();
+                } catch (e) {
+                    type = 'other';
+                }
+                if (['checkbox', 'radio'].indexOf(type) === -1) {
+                    return input.value;
+                }
+                // single checkbox or… radio button (weird, I know)
+                if (input.hasAttribute('value')) {
+                    return input.checked ? input.getAttribute('value') : undefined;
+                }
+                return input.checked;
+            }
+            function getMultipleValues(inputs) {
+                type = inputs[0].getAttribute('type').toLowerCase();
+                if (type === 'radio') {
+                    var value;
+                    [].forEach.call(inputs, function(radio) {
+                        value = radio.checked ? radio.value : undefined;
+                    });
+                    return value;
+                } else if (type === 'checkbox') {
+                    var values = [];
+                    [].forEach.call(inputs, function(checkbox) {
+                        if (checkbox.checked) {
+                            values.push(checkbox.value);
+                        }
+                    });
+                    return values;
+                }
+            }
+            var inputs = this.findAll('[name="' + inputName + '"]'), type;
+            switch (inputs.length) {
+                case 0:  return null;
+                case 1:  return getSingleValue(inputs[0]);
+                default: return getMultipleValues(inputs);
+            }
+        };
+
+        /**
+         * Retrieves a given form all of its field values.
+         *
+         * @param  String  selector  A DOM CSS3/XPath selector
+         * @return Object
+         */
+        this.getFormValues = function getFormValues(selector) {
+            var form = this.findOne(selector);
+            var values = {};
+            var self = this;
+            [].forEach.call(form.elements, function(element) {
+                var name = element.getAttribute('name');
+                if (name) {
+                    values[name] = self.getFieldValue(name);
+                }
+            });
+            return values;
         };
 
         /**
@@ -497,6 +618,39 @@
         };
 
         /**
+         * Performs an AJAX request.
+         *
+         * @param   String   url     Url.
+         * @param   String   method  HTTP method (default: GET).
+         * @param   Object   data    Request parameters.
+         * @param   Boolean  async   Asynchroneous request? (default: false)
+         * @return  String           Response text.
+         */
+        this.sendAJAX = function sendAJAX(url, method, data, async) {
+            var xhr = new XMLHttpRequest(),
+                dataString = "",
+                dataList = [];
+            method = method && method.toUpperCase() || "GET";
+            xhr.open(method, url, !!async);
+            this.log("sendAJAX(): Using HTTP method: '" + method + "'", "debug");
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+            if (method === "POST") {
+                if (typeof data === "object") {
+                    for (var k in data) {
+                        dataList.push(encodeURIComponent(k) + "=" + encodeURIComponent(data[k].toString()));
+                    }
+                    dataString = dataList.join('&');
+                    this.log("sendAJAX(): Using request data: '" + dataString + "'", "debug");
+                } else if (typeof data === "string") {
+                    dataString = data;
+                }
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            }
+            xhr.send(method === "POST" ? dataString : null);
+            return xhr.responseText;
+        };
+
+        /**
          * Sets a field (or a set of fields) value. Fails silently, but log
          * error messages.
          *
@@ -504,14 +658,17 @@
          * @param  mixed                 value  The field value to set
          */
         this.setField = function setField(field, value) {
+            /*jshint maxcomplexity:99 */
             var logValue, fields, out;
             value = logValue = (value || "");
             if (field instanceof NodeList) {
                 fields = field;
                 field = fields[0];
             }
-            if (!field instanceof HTMLElement) {
-                this.log("Invalid field type; only HTMLElement and NodeList are supported", "error");
+            if (!(field instanceof HTMLElement)) {
+                var error = new Error('Invalid field type; only HTMLElement and NodeList are supported');
+                error.name = 'FieldNotFound';
+                throw error;
             }
             if (this.options && this.options.safeLogs && field.getAttribute('type') === "password") {
                 // obfuscate password value

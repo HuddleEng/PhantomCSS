@@ -1,7 +1,7 @@
 PhantomCSS
 ==========
 
-*CSS regression testing*. An integration of [js-imagediff](http://github.com/HumbleSoftware/js-imagediff) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing and test coverage of Website styling to support refactoring of CSS.
+*CSS regression testing*. An integration of [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing and test coverage of Website styling to support refactoring of CSS.
 
 ### Why?
 
@@ -9,7 +9,7 @@ The problem with functional UI tests is that they make assertions on HTML markup
 
 ### How?
 
-PhantomCSS takes screenshots captured by PhantomJS and compares them to baseline images using [js-imagediff](http://github.com/HumbleSoftware/js-imagediff) to test for rgb pixel differences with HTML5 canvas.
+PhantomCSS takes screenshots captured by PhantomJS and compares them to baseline images using [Resemble.js](http://huddle.github.com/Resemble.js/) to test for rgb pixel differences with HTML5 canvas. PhantomCSS then generates image diffs to help you find the cause so you don't need to manually compare the new and old images.
 
 PhantomCSS can only work when UI is predictable. It's possible to hide mutable UI components with PhantomCSS but it would be better if could drive the UI from faked data during test runs.  Take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for mocking XHR requests.
 
@@ -24,6 +24,7 @@ var css = require('./modules/phantomcss.js');
 css.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
+	failedComparisonsRoot: './failures',
 	testRunnerUrl: 'http://my.blank.page.html', //  needs to be a 'http' domain for the HTML5 magic to work
 });
 
@@ -39,7 +40,34 @@ css.compareAll();
 * Find the screenshot directory and check that they look as you expect.  These images will be used as a baseline.  Subsequent test runs will report if the latest screenshot is different to the baseline
 * Commit/push these baseline images with your normal tests (presuming you're using a version control system)
 * Run the tests again.  New screenshots will be created to compare against the baseline image.  These new images can be ignored, they will be replaced every test run. They don't need to be committed
+* If there are test failures, image diffs will be generated.
 
+
+### Another example
+
+```javascript
+
+css.init({
+	libraryRoot: './modules/PhantomCSS',
+	screenshotRoot: './screenshots',
+	failedComparisonsRoot: './failures',
+	testRunnerUrl: 'http://my.blank.page.html',
+
+	onFail: function(test){ console.log(test.filename, test.mismatch); },
+	onPass: function(){ console.log(test.filename); },
+	onTimeout: function(){ console.log(test.filename); },
+	onComplete: function(allTests, noOfFails, noOfErrors){
+		allTests.forEach(function(test){
+			if(test.fail){
+				console.log(test.filename, test.mismatch);
+			}
+		});
+	},
+});
+
+css.turnOffAnimations(); // turn off CSS transitions and jQuery animations
+
+```
 
 --------------------------------------
 
