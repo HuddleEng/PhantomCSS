@@ -405,6 +405,22 @@ URL: https://github.com/Huddle/Resemble.js
 			return barHeight;
 		}
 
+		function normalise(img, w, h){
+			var c;
+			var context;
+
+			if(img.height < h || img.width < w){
+				c = document.createElement('canvas');
+				c.width = w;
+				c.height = h;
+				context = c.getContext('2d');
+				context.putImageData(img, 0, 0);
+				return context.getImageData(0, 0, w, h);
+			}
+
+			return img;
+		}
+
 		function compare(one, two){
 
 			function onceWeHaveBoth(){
@@ -419,8 +435,8 @@ URL: https://github.com/Huddle/Resemble.js
 					} else {
 						data.isSameDimensions = false;
 					}
-					
-					analyseImages(images[0], images[1], width, height);
+
+					analyseImages( normalise(images[0],width, height), normalise(images[1],width, height), width, height);
 
 					triggerDataUpdate();
 				}
