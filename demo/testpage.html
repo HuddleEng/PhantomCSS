@@ -4,13 +4,17 @@
 	<title>PhantomCSS: Test Page</title>
 
 	<style>
+		body {
+			background: white;
+		}
+
 		.msg{
 			display:none;
-			border: 2px solid hotpink;
-			color: hotpink;
+			border: 2px solid darkblue;
+			color: darkblue;
 			font-weight: bold;
 			font-family: 'comic sans ms';
-			font-size: 32px;
+			font-size: 31px;
 		}
 
 		.msg:target {
@@ -22,7 +26,7 @@
 <body>
 	<a href="#focus">Click me</a>
 	<span class="msg" id="focus">
-		Bam! Looks different.
+		This just appeared.
 	</span>
 </body>
 
