@@ -56,9 +56,11 @@ function turnOffAnimations(){
 	});
 }
 
-function _fileNameGetter(_root, fileName){
-	var fileName = fileName || "screenshot";
-	var name = _root + "/" + fileName + "_" + _count++;
+function _fileNameGetter(root, fileName){
+	var name;
+
+	fileName = fileName || "screenshot";
+	name = root + "/" + fileName + "_" + _count++;
 
 	if(fs.isFile(name+'.png')){
 		return name+'.diff.png';
