@@ -1,8 +1,9 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 21 Feb 2013
+Last updated date: 07 May 2013
 URL: https://github.com/Huddle/PhantomCSS
+More: http://tldr.huddle.com/blog/css-testing/
 */
 
 var fs = require('fs');
@@ -30,7 +31,7 @@ function init(options){
 	_root = options.screenshotRoot || _root;
 	_diffRoot = options.failedComparisonsRoot || _diffRoot;
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
-	
+
 	_onPass = options.onPass || _onPass;
 	_onFail = options.onFail || _onFail;
 	_onTimeout = options.onTimeout || _onTimeout;
