@@ -1,11 +1,11 @@
 PhantomCSS
 ==========
 
-*CSS regression testing*. An integration of [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing and test coverage of Website styling to support refactoring of CSS.
+*CSS regression testing*. An integration of [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing of Website styling to support refactoring of CSS.
 
 ### Why?
 
-The problem with functional UI tests is that they make assertions on HTML markup, not the actual rendering. You can't know through automated tests if something has visually broke, too much margin, disabled state etc.  This situation is exacerbated by the increasing use of CSS3 for visual state changes that were traditionally built with JavaScript and DOM manipulation, ':target' pseudoclass or keyframes for example.
+The problem with functional UI tests is that they make assertions on HTML markup, not the actual rendering. You can't know through automated tests if something has visually broke, too much margin, disabled state etc.  This situation is exacerbated by the increasing use of CSS3 for visual state changes that were traditionally built with JavaScript and DOM manipulation, ':target' pseudoclass or keyframes for example. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/).
 
 ### How?
 
@@ -28,7 +28,7 @@ css.init({
 	testRunnerUrl: 'http://my.blank.page.html', //  needs to be a 'http' domain for the HTML5 magic to work
 });
 
-css.screenshot("#CSS .selector"/*, delay: 500, selector: ''.elements-to-be-hidden*/);
+css.screenshot("#CSS .selector"/*, delay: 500, selector: '.elements-to-be-hidden', filename: 'my_webapp_feature'*/);
 
 css.compareAll();
 ```
@@ -63,6 +63,17 @@ css.init({
 			}
 		});
 	},
+	fileNameGetter: function(root,filename){ 
+		// globally override output filename
+		// files must exist under root
+		// and use the .diff convention
+		var name = root+'/somewhere/'+filename;
+		if(fs.isFile(name+'.png')){
+			return name+'.diff.png';
+		} else {
+			return name+'.png';
+		}
+	}
 });
 
 css.turnOffAnimations(); // turn off CSS transitions and jQuery animations
