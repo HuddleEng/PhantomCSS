@@ -24,14 +24,19 @@ var css = require('./modules/phantomcss.js');
 css.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures',
+	failedComparisonsRoot: './failures', // If this is not defined failure images can still be found alongside the original and new images
 	testRunnerUrl: 'http://my.blank.page.html', //  needs to be a 'http' domain for the HTML5 magic to work
 });
 
 css.screenshot("#CSS .selector"/*, delay: 500, selector: '.elements-to-be-hidden', filename: 'my_webapp_feature'*/);
 
 css.compareAll();
+
+// css.compareMatched( new RegExp('these_tests_only') );
+
 ```
+
+Please note that I have included the PhantomJS exe for convenience only, please follow the [PhantomJS install instructions](http://phantomjs.org/download.html) for custom and non-Windows environments.
 
 ### Workflow
 
@@ -52,6 +57,8 @@ css.init({
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures',
 	testRunnerUrl: 'http://my.blank.page.html',
+
+	addLabelToFailedImage: false, // Don't add label to generated failure image
 
 	onFail: function(test){ console.log(test.filename, test.mismatch); },
 	onPass: function(){ console.log(test.filename); },

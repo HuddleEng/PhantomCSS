@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 07 May 2013
+Last updated date: 11 Jun 2013
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -9,7 +9,7 @@ More: http://tldr.huddle.com/blog/css-testing/
 var fs = require('fs');
 
 var _root = '.';
-var _diffRoot = '.';
+var _diffRoot = false;
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
@@ -17,9 +17,12 @@ var _emptyPageToRunTestsOn;
 var _libraryRoot = '.';
 var exitStatus;
 var _hideElements;
+var _addLabelToFailedImage = true;
+var _test_match;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
+exports.compareMatched = compareMatched;
 exports.init = init;
 exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
@@ -38,6 +41,10 @@ function init(options){
 	_onComplete = options.onComplete || options.report || _onComplete;
 
 	_hideElements = options.hideElements;
+
+	if(options.addLabelToFailedImage !== undefined){
+		_addLabelToFailedImage = options.addLabelToFailedImage;
+	}
 }
 
 function turnOffAnimations(){
@@ -61,7 +68,7 @@ function _fileNameGetter(root, fileName){
 	var name;
 
 	fileName = fileName || "screenshot";
-	name = root + "/" + fileName + "_" + _count++;
+	name = root + fs.separator + fileName + "_" + _count++;
 
 	if(fs.isFile(name+'.png')){
 		return name+'.diff.png';
@@ -92,7 +99,7 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 		catch(ex){
 			console.log("Screenshot FAILED: " + ex.message);
 		}
-		
+
 	}); // give a bit of time for all the images appear
 }
 
@@ -108,9 +115,9 @@ function asyncCompare(one, two, func){
 	});
 
 	casper.evaluate(function(filename){
-		window._imagediff_.run(filename);
+		window._imagediff_.run( filename );
 	}, {
-		label: one
+		label: _addLabelToFailedImage ? one : false
 	});
 
 	casper.waitFor(
@@ -120,7 +127,7 @@ function asyncCompare(one, two, func){
 			});
 		},
 		function () {
-	
+
 			var mismatch = casper.evaluate(function(){
 				return window._imagediff_.getResult();
 			});
@@ -156,11 +163,23 @@ function getDiffs (path){
 		fs.list(_realPath).forEach(getDiffs);
 	} else {
 		if( /\.diff\./.test(path.toLowerCase()) ){
-			_diffsToProcess.push(filePath);
+			if(_test_match){
+				if( _test_match.test(_realPath.toLowerCase()) ){
+					console.log('Analysing', _realPath);
+					_diffsToProcess.push(filePath);
+				}
+			} else {
+				_diffsToProcess.push(filePath);	
+			}
 		}
 	}
 
 	_realPath = _realPath.replace(fs.separator + path, '');
+}
+
+function compareMatched(match){
+	_test_match = match;
+	compareAll();
 }
 
 function compareAll(){
@@ -204,23 +223,30 @@ function compareAll(){
 								});
 							},
 							function () {
+								var failFile, safeFileName, increment;
 
-								var failFile = _diffRoot + "/" + file.split("\\").pop().replace('.diff.png', '');
-								var safeFileName = failFile;
-								var increment = 0;
+								if(_diffRoot){
+									// flattened structure for failed diffs so that it is easier to preview
+									failFile = _diffRoot + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '');
+									safeFileName = failFile;
+									increment = 0;
 
-								while ( fs.isFile(safeFileName+'.fail.png') ){
-									increment++;
-									safeFileName = failFile+'.'+increment;
+									while ( fs.isFile(safeFileName+'.fail.png') ){
+										increment++;
+										safeFileName = failFile+'.'+increment;
+									}
+
+									failFile = safeFileName + '.fail.png';
+
+									casper.captureSelector(failFile, 'img');
 								}
 
-								failFile = safeFileName + '.fail.png';
+								casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
 
 								casper.evaluate(function(){
 									window._imagediff_.hasImage = false;
 								});
 
-								casper.captureSelector(failFile, 'img');
 							}, function(){},
 							10000
 						);
@@ -246,7 +272,7 @@ function compareAll(){
 
 function initClient(){
 
-	casper.page.injectJs(_libraryRoot+'/resemble.js');
+	casper.page.injectJs(_libraryRoot+fs.separator+'resemble.js');
 
 	casper.evaluate(function(){
 		
