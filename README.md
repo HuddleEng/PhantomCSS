@@ -92,6 +92,9 @@ css.compareAll('exclude.test'); // String is converted into a Regular expression
 
 ```
 
+...You might also be interested in [PhantomFlow](http://github.com/Huddle/PhantomFlow), describe and visualise user flows through tests.
+
+
 --------------------------------------
 
 Created by [James Cryer](http://github.com/jamescryer) and the Huddle development team.
