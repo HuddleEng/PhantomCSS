@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 11 Jun 2013
+Last updated date: 20 Jun 2013
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -19,17 +19,19 @@ var exitStatus;
 var _hideElements;
 var _addLabelToFailedImage = true;
 var _test_match;
+var _test_exclude;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
 exports.compareMatched = compareMatched;
 exports.init = init;
+exports.update = init;
 exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
 
 function init(options){
 	casper = options.casper || casper;
-	_emptyPageToRunTestsOn = options.testRunnerUrl;
+	_emptyPageToRunTestsOn = options.testRunnerUrl || _emptyPageToRunTestsOn;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
 	_diffRoot = options.failedComparisonsRoot || _diffRoot;
@@ -158,18 +160,22 @@ function getDiffs (path){
 	}
 
 	filePath = _realPath;
-	
+
 	if(fs.isDirectory(_realPath) ){
 		fs.list(_realPath).forEach(getDiffs);
 	} else {
 		if( /\.diff\./.test(path.toLowerCase()) ){
 			if(_test_match){
 				if( _test_match.test(_realPath.toLowerCase()) ){
-					console.log('Analysing', _realPath);
-					_diffsToProcess.push(filePath);
+					if( !(_test_exclude && _test_exclude.test(_realPath.toLowerCase())) ){
+						console.log('Analysing', _realPath);
+						_diffsToProcess.push(filePath);
+					}
 				}
 			} else {
-				_diffsToProcess.push(filePath);	
+				if( !(_test_exclude && _test_exclude.test(_realPath.toLowerCase())) ){
+					_diffsToProcess.push(filePath);
+				}
 			}
 		}
 	}
@@ -177,15 +183,20 @@ function getDiffs (path){
 	_realPath = _realPath.replace(fs.separator + path, '');
 }
 
-function compareMatched(match){
-	_test_match = match;
-	compareAll();
+function compareMatched(match, exclude){
+	_test_match = typeof match === 'string' ? new RegExp(match) : match;
+	compareAll(exclude);
 }
 
-function compareAll(){
+function compareAll(exclude){
 	var tests = [];
 	var fails = 0;
 	var errors = 0;
+
+	_test_exclude = typeof exclude === 'string' ? new RegExp(exclude) : exclude;
+	_realPath = undefined;
+
+	_diffsToProcess = [];
 
 	getDiffs(_root);
 
@@ -203,7 +214,7 @@ function compareAll(){
 			casper.
 			thenOpen (_emptyPageToRunTestsOn, function (){
 				asyncCompare(baseFile, file, function(isSame, mismatch){
-					
+
 					if(!isSame){
 
 						test.fail = true;
