@@ -32,7 +32,6 @@ css.screenshot("#CSS .selector"/*, delay: 500, selector: '.elements-to-be-hidden
 
 css.compareAll();
 
-// css.compareMatched( new RegExp('these_tests_only') );
 
 ```
 
@@ -84,6 +83,12 @@ css.init({
 });
 
 css.turnOffAnimations(); // turn off CSS transitions and jQuery animations
+
+css.compareAll('exclude.test'); // String is converted into a Regular expression that matches on full image path
+
+// css.compareMatched('include.test', 'exclude.test');
+// css.compareMatched( new RegExp('include.test'), new RegExp('exclude.test'));
+
 
 ```
 
