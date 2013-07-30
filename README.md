@@ -86,20 +86,21 @@ css.compareAll('exclude.test'); // String is converted into a Regular expression
 // css.compareMatched( new RegExp('include.test'), new RegExp('exclude.test'));
 ```
 
-### Notes: 
+### Notes
 
-#### PhantomCSS should not be used to replace functional tests
+#### Name your screenshots!
 
-If you needed functional tests before, then you still need them.  Automated visual regression testing gives us coverage of CSS and design in a way we didn't have before, but that doesn't mean that conventional test assertions are now invalid.  Feedback time is crucial with test automation, the longer it takes the easier it is to ignore; the easier it is to ignore the sooner trust is lost from the team.  Unfortunately comparing images it not and never will be as fast as simple DOM assertion.
+By default PhantomCSS creates a file called screenshot_0.png, not very helpful.  You can name your screenshot by passing a string to the forth parameter.
 
-#### Don't try to test all the visuals
+```javascript
+var delay, hideElementsSelector;
 
-I'd argue this applies to all automated testing approaches.  As a rule, try to maximise coverage with fewer tests.  This is a difficult balancing act because granular feedback/reporting is very important for debugging and build analysis. Testing many things in one assert/screenshot might tell you there is a problem, but makes it harder to get to the root of the bug.  As a CSS/HTML Dev you'll know what components are more fragile than others, which are reused and which aren't, concentrate your visual tests on these areas.
+phantomcss.screenshot("#feedback-form", delay, hideElementsSelector, "Responsive Feedback Form");
+```
 
-#### Full page screenshots are a bad idea
+(I'd like to clean up the signature, but for backwards compatibility, it is what it is.)
 
-If you try to test too much in one screenshot then you could end up with lots of failing tests every time someone makes a small change.  Say you've set up full-page visual regression tests for your 50 page website, and someone adds 2px padding to the footer - that’s 50 failed tests because of one change.  It's better to test UI components individually; in this example the footer could have its own test.
-There is also a technical problem with this approach, the larger the image, the longer it takes to process.  An added pixel padding on the page body will offset everything, at best you'll have a sea of pink in the failed diff, at worse you'll get a TIMEOUT because it took too long to analyse.
+Perhaps a better way is to use the ‘fileNameGetter’ callback property on the ‘init’ method. This does involve having a bit more structure around your tests.  See: https://github.com/Huddle/PhantomFlow/blob/master/demo/runTests.js#L72
 
 #### CSS3 selectors for testing
 
@@ -116,19 +117,18 @@ But this is:
 phantomcss.screenshot("#feedback-form");
 ```
 
-#### Name your screenshots!
+#### PhantomCSS should not be used to replace functional tests
 
-By default PhantomCSS creates a file called screenshot_0.png, not very helpful.  You can name your screenshot by passing a string to the forth parameter.
+If you needed functional tests before, then you still need them.  Automated visual regression testing gives us coverage of CSS and design in a way we didn't have before, but that doesn't mean that conventional test assertions are now invalid.  Feedback time is crucial with test automation, the longer it takes the easier it is to ignore; the easier it is to ignore the sooner trust is lost from the team.  Unfortunately comparing images it not and never will be as fast as simple DOM assertion.
 
-```javascript
-var delay, hideElementsSelector;
+#### Don't try to test all the visuals
 
-phantomcss.screenshot("#feedback-form", delay, hideElementsSelector, "Responsive Feedback Form");
-```
+I'd argue this applies to all automated testing approaches.  As a rule, try to maximise coverage with fewer tests.  This is a difficult balancing act because granular feedback/reporting is very important for debugging and build analysis. Testing many things in one assert/screenshot might tell you there is a problem, but makes it harder to get to the root of the bug.  As a CSS/HTML Dev you'll know what components are more fragile than others, which are reused and which aren't, concentrate your visual tests on these areas.
 
-(I'd like to clean up the signature, but for backwards compatibility, it is what it is.)
+#### Full page screenshots are a bad idea
 
-Perhaps a better way is to use the ‘fileNameGetter’ callback property on the ‘init’ method. This does involve having a bit more structure around your tests.  See: https://github.com/Huddle/PhantomFlow/blob/master/demo/runTests.js#L72
+If you try to test too much in one screenshot then you could end up with lots of failing tests every time someone makes a small change.  Say you've set up full-page visual regression tests for your 50 page website, and someone adds 2px padding to the footer - that’s 50 failed tests because of one change.  It's better to test UI components individually; in this example the footer could have its own test.
+There is also a technical problem with this approach, the larger the image, the longer it takes to process.  An added pixel padding on the page body will offset everything, at best you'll have a sea of pink in the failed diff, at worse you'll get a TIMEOUT because it took too long to analyse.
 
 #### Scaling visual regression testing within a large team
 
@@ -142,9 +142,8 @@ Below is an example of a false-negative caused by antialiasing differences on di
 
 ![Three images: baseline, latests and diff where antialiasing has caused the failed diff](https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/false-negative.png "A False-negative?")
 
-[screenshot]
+#### Scaling visual regression testing with Git
 
-Scaling visual regression testing with Git
 If your using a version control system like Git to store the baseline screenshots the repository size becomes increasingly relevant as your test suite grows.  I'd recommend using a tool like https://github.com/joeyh/git-annex or https://github.com/schacon/git-media to store the images outside of the repo.
 
 #### ...You might also be interested in
@@ -154,4 +153,4 @@ If your using a version control system like Git to store the baseline screenshot
 
 --------------------------------------
 
-Created by [James Cryer](http://github.com/jamescryer) and the Huddle development team.
+PhantomCSS was created by [James Cryer](http://github.com/jamescryer) and the Huddle development team.
