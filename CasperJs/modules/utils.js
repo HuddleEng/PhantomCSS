@@ -59,23 +59,19 @@ function betterTypeOf(input) {
 exports.betterTypeOf = betterTypeOf;
 
 /**
- * Cleans a passed URL if it lacks a slash at the end when a sole domain is used.
+ * Cleans a passed URL.
  *
  * @param  String  url An HTTP URL
  * @return String
  */
 function cleanUrl(url) {
     "use strict";
-    var parts = /(https?):\/\/(.*)/i.exec(url);
-    if (!parts) {
+    if (url.toLowerCase().indexOf('http') !== 0) {
         return url;
     }
-    var protocol = parts[1];
-    var subparts = parts[2].split('/');
-    if (subparts.length === 1) {
-        return format("%s://%s/", protocol, subparts[0]);
-    }
-    return url;
+    var a = document.createElement('a');
+    a.href = url;
+    return a.href;
 }
 exports.cleanUrl = cleanUrl;
 
@@ -372,6 +368,18 @@ function isObject(value) {
 exports.isObject = isObject;
 
 /**
+ * Checks if value is a RegExp
+ *
+ * @param  mixed  value
+ * @return Boolean
+ */
+function isRegExp(value) {
+    "use strict";
+    return isType(value, "regexp");
+}
+exports.isRegExp = isRegExp;
+
+/**
  * Checks if value is a javascript String
  *
  * @param  mixed  value
@@ -480,14 +488,14 @@ exports.isWebPage = isWebPage;
 function mergeObjects(origin, add) {
     "use strict";
     for (var p in add) {
-        try {
-            if (add[p].constructor === Object) {
+        if (add[p] && add[p].constructor === Object) {
+            if (origin[p] && origin[p].constructor === Object) {
                 origin[p] = mergeObjects(origin[p], add[p]);
             } else {
-                origin[p] = add[p];
+                origin[p] = clone(add[p]);
             }
-        } catch(e) {
-          origin[p] = add[p];
+        } else {
+            origin[p] = add[p];
         }
     }
     return origin;

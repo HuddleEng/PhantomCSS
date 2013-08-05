@@ -1,7 +1,26 @@
 CasperJS Changelog
 ==================
 
-2012-01-17, v1.0.1
+2013-07-13, v1.0.3
+------------------
+
+- speeded up tests and `wait*` operations (expect average execution time to be divided by 4)
+- fixed [#414](https://github.com/n1k0/casperjs/issues/414) - better `utils.cleanUrl()`
+- fixed [#438](https://github.com/n1k0/casperjs/issues/438) - fixed `Casper#getElementAttribute()` broken compatibility with XPath selectors
+- fixed [#484](https://github.com/n1k0/casperjs/issues/484) - added support for the PhantomJS `child_process` module
+- fixes [#457](https://github.com/n1k0/casperjs/issues/457) - fill should not emit console messages
+- added support for `child_process` phantomjs module
+- peeded up tests and `wait*` methods execution
+
+2013-02-08, v1.0.2
+------------------
+
+- fixed [#375](https://github.com/n1k0/casperjs/pull/375) - Fixes a bug with getting form values for radio inputs, and introduces a minor optimization to avoid processing the same form fields more than once.
+- closed [#373](https://github.com/n1k0/casperjs/issues/373) - added RegExp support to `Casper.waitForText()`
+- fixed [#368](https://github.com/n1k0/casperjs/issues/368) - Remote JS error is thrown when a click target is missing after `click()`
+- merged PR [#357](https://github.com/n1k0/casperjs/pull/357) - fire the `input` event after setting input value (required to support [angular.js](http://angularjs.org/) apps)
+
+2013-01-17, v1.0.1
 ------------------
 
 - fixed [#336](https://github.com/n1k0/casperjs/issues/336) - Test result duration may have an exotic value

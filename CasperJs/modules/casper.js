@@ -28,7 +28,7 @@
  *
  */
 
-/*global CasperError console exports phantom require __utils__*/
+/*global CasperError, console, exports, phantom, require, __utils__*/
 
 var colorizer = require('colorizer');
 var events = require('events');
@@ -389,7 +389,10 @@ Casper.prototype.click = function click(selector) {
     this.checkStarted();
     var success = this.mouseEvent('click', selector);
     this.evaluate(function(selector) {
-        document.querySelector(selector).focus();
+        var element = __utils__.findOne(selector);
+        if (element) {
+            element.focus();
+        }
     }, selector);
     return success;
 };
@@ -723,6 +726,12 @@ Casper.prototype.fill = function fill(selector, vals, submit) {
             var method = (form.getAttribute('method') || "GET").toUpperCase();
             var action = form.getAttribute('action') || "unknown";
             __utils__.log('submitting form to ' + action + ', HTTP ' + method, 'info');
+            var event = document.createEvent('Event');
+            event.initEvent('submit', true, true);
+            if (!form.dispatchEvent(event)) {
+                __utils__.log('unable to submit form', 'warning');
+                return;
+            }
             if (typeof form.submit === "function") {
                 form.submit();
             } else {
@@ -815,7 +824,7 @@ Casper.prototype.getElementAttr = function getElementAttr(selector, attribute) {
     "use strict";
     this.checkStarted();
     return this.evaluate(function _evaluate(selector, attribute) {
-        return document.querySelector(selector).getAttribute(attribute);
+        return __utils__.findOne(selector).getAttribute(attribute);
     }, selector, attribute);
 };
 
@@ -1291,7 +1300,7 @@ Casper.prototype.run = function run(onComplete, time) {
     }
     this.log(f("Running suite: %d step%s", this.steps.length, this.steps.length > 1 ? "s" : ""), "info");
     this.emit('run.start');
-    this.checker = setInterval(this.checkStep, (time ? time: 100), this, onComplete);
+    this.checker = setInterval(this.checkStep, (time ? time: 10), this, onComplete);
     return this;
 };
 
@@ -1728,7 +1737,7 @@ Casper.prototype.waitFor = function waitFor(testFx, then, onTimeout, timeout) {
                 }
                 clearInterval(interval);
             }
-        }, 100, this, testFx, timeout, onTimeout);
+        }, 10, this, testFx, timeout, onTimeout);
     });
 };
 
@@ -1793,20 +1802,24 @@ Casper.prototype.waitForSelector = function waitForSelector(selector, then, onTi
 };
 
 /**
- * Waits until the page contains given HTML text.
+ * Waits until the page contains given HTML text or matches a given RegExp.
  *
- * @param  String    text       Text to wait for
- * @param  Function  then       The next step to perform (optional)
- * @param  Function  onTimeout  A callback function to call on timeout (optional)
- * @param  Number    timeout    The max amount of time to wait, in milliseconds (optional)
+ * @param  String|RegExp  pattern    Text or RegExp to wait for
+ * @param  Function       then       The next step to perform (optional)
+ * @param  Function       onTimeout  A callback function to call on timeout (optional)
+ * @param  Number         timeout    The max amount of time to wait, in milliseconds (optional)
  * @return Casper
  */
-Casper.prototype.waitForText = function(text, then, onTimeout, timeout) {
+Casper.prototype.waitForText = function(pattern, then, onTimeout, timeout) {
     "use strict";
     this.checkStarted();
     timeout = timeout ? timeout : this.options.waitTimeout;
     return this.waitFor(function _check() {
-        return this.getPageContent().indexOf(text) !== -1;
+        var content = this.getPageContent();
+        if (utils.isRegExp(pattern)) {
+            return pattern.test(content);
+        }
+        return content.indexOf(pattern) !== -1;
     }, then, onTimeout, timeout);
 };
 
@@ -2004,9 +2017,10 @@ function createPage(casper) {
         if (logTest && logTest.length === 3) {
             logLevel = logTest[1];
             msg = logTest[2];
+            casper.log(msg, logLevel, "remote");
+        } else {
+            casper.emit('remote.message', msg);
         }
-        casper.log(msg, logLevel, "remote");
-        casper.emit('remote.message', msg);
     };
     page.onError = function onError(msg, trace) {
         casper.emit('page.error', msg, trace);
