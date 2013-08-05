@@ -38,7 +38,8 @@ phantomcss.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures' 
-	// If this is not defined failure images can still be found alongside the original and new images
+	// If failedComparisonsRoot is not defined failure images can still 
+	// be found alongside the original and new images
 });
 
 
