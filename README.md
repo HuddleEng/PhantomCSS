@@ -26,8 +26,7 @@ var css = require('./modules/phantomcss.js');
 css.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures', // If this is not defined failure images can still be found alongside the original and new images
-	testRunnerUrl: 'http://my.blank.page.html', //  needs to be a 'http' domain for the HTML5 magic to work
+	failedComparisonsRoot: './failures' // If this is not defined failure images can still be found alongside the original and new images
 });
 
 css.screenshot("#CSS .selector"/*, delay: 500, selector: '.elements-to-be-hidden', filename: 'my_webapp_feature'*/);
@@ -53,7 +52,6 @@ css.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures',
-	testRunnerUrl: 'http://my.blank.page.html',
 
 	addLabelToFailedImage: false, // Don't add label to generated failure image
 

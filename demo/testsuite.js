@@ -15,12 +15,11 @@ var url = initPageOnServer('demo/testpage.html');
 
 css.init({
 	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures',
-	testRunnerUrl: url.emptyPage
+	failedComparisonsRoot: './failures'
 });
 
 casper.
-	start(url.testPage).
+	start( url ).
 	then( function should_look_like_this(){
 		css.screenshot('body');
 	} ).
@@ -46,18 +45,9 @@ function initPageOnServer(path){
 	
 	var service = server.listen(1337, function(request, response) {
 		response.statusCode = 200;
-		
-		if(request.url.indexOf('empty') != -1){
-			response.write('<html><body>This blank page is used for processing the images with HTML5 magics</body></html>');
-		} else {
-			response.write(html);
-		}
-
+		response.write(html);
 		response.close();
 	});
 
-	return {
-		testPage: 'http://localhost:1337',
-		emptyPage: 'http://localhost:1337/empty'
-	};
+	return 'http://localhost:1337';
 }

@@ -13,7 +13,6 @@ var _diffRoot = false;
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _emptyPageToRunTestsOn;
 var _libraryRoot = '.';
 var exitStatus;
 var _hideElements;
@@ -31,7 +30,6 @@ exports.getExitStatus = getExitStatus;
 
 function init(options){
 	casper = options.casper || casper;
-	_emptyPageToRunTestsOn = options.testRunnerUrl || _emptyPageToRunTestsOn;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
 	_diffRoot = options.failedComparisonsRoot || _diffRoot;
@@ -212,7 +210,8 @@ function compareAll(exclude){
 			tests.push(test);
 		} else {
 			casper.
-			thenOpen (_emptyPageToRunTestsOn, function (){
+			thenOpen ( "resemblejscontainer.html" , function (){
+
 				asyncCompare(baseFile, file, function(isSame, mismatch){
 
 					if(!isSame){
