@@ -1,7 +1,7 @@
 PhantomCSS
 ==========
 
-**CSS regression testing**. [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing on Web apps, live style guides and Responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
+**CSS regression testing**. [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing of Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
 ### Code
 
@@ -14,7 +14,7 @@ casper.
 		casper.click('button#open-dialog');
 		
 		// Take a screenshot of the UI component
-		css.screenshot('#the-dialog');
+		phantomcss.screenshot('#the-dialog');
 
 	});
 ```
@@ -25,24 +25,30 @@ PhantomCSS takes screenshots captured by PhantomJS and compares them to baseline
 
 ![A failed visual regression test, pink areas show where padding has changed.](https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/intro-example.png "Failed visual regression test")
 
-PhantomCSS can only work when UI is predictable. It's possible to hide mutable UI components with PhantomCSS but it would be better to drive the UI from faked data during test runs. Take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for mocking XHR requests.
+Screenshot based regression testing can only work when UI is predictable. It's possible to hide mutable UI components with PhantomCSS but it would be better to drive the UI from faked data during test runs. Take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for mocking XHR requests.
 
 ### Setup
 
 Check out the [demo](http://github.com/Huddle/PhantomCSS/tree/master/demo) for a full working example (run `phantomjs demo/testsuite.js` from the command line).
 
 ```javascript
-var css = require('./modules/phantomcss.js');
+var phantomcss = require('./modules/phantomcss.js');
 
-css.init({
+phantomcss.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures' // If this is not defined failure images can still be found alongside the original and new images
+	failedComparisonsRoot: './failures' 
+	// If this is not defined failure images can still be found alongside the original and new images
 });
 
-css.screenshot("#CSS .selector"/*, delay: 500, selector: '.elements-to-be-hidden', filename: 'my_webapp_feature'*/);
 
-css.compareAll();
+var delay = 10;
+var hideElements = 'input[type=file]';
+var screenshotName = 'the_dialog'
+
+phantomcss.screenshot( "#CSS .selector" /*, delay, hideElements, screenshotName */);
+
+phantomcss.compareAll();
 ```
 
 Please note that I have included the PhantomJS exe for convenience only, please follow the [PhantomJS install instructions](http://phantomjs.org/download.html) for custom and non-Windows environments.
@@ -59,7 +65,7 @@ Please note that I have included the PhantomJS exe for convenience only, please 
 
 ```javascript
 
-css.init({
+phantomcss.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures',
@@ -89,12 +95,13 @@ css.init({
 	}
 });
 
-css.turnOffAnimations(); // turn off CSS transitions and jQuery animations
+phantomcss.turnOffAnimations(); // turn off CSS transitions and jQuery animations
 
-css.compareAll('exclude.test'); // String is converted into a Regular expression that matches on full image path
+phantomcss.compareAll('exclude.test'); 
+// String is converted into a Regular expression that matches on full image path
 
-// css.compareMatched('include.test', 'exclude.test');
-// css.compareMatched( new RegExp('include.test'), new RegExp('exclude.test'));
+// phantomcss.compareMatched('include.test', 'exclude.test');
+// phantomcss.compareMatched( new RegExp('include.test'), new RegExp('exclude.test'));
 ```
 
 ### Best Practices
@@ -159,7 +166,7 @@ If your using a version control system like Git to store the baseline screenshot
 
 ### ...You might also be interested in
 
-[PhantomFlow](http://github.com/Huddle/PhantomFlow), is an experimental way of describing and visualising user flows through tests. As well as providing a terse readable structure for UI testing, it also produces a fantastic graph visualisation that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better.
+**[PhantomFlow](http://github.com/Huddle/PhantomFlow)**, is an experimental way of describing and visualising user flows through tests. As well as providing a terse readable structure for UI testing, it also produces a fantastic graph visualisation that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better.
 
 
 --------------------------------------
