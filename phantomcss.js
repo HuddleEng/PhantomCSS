@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 20 Jun 2013
+Last updated date: 06 Aug 2013
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -78,6 +78,12 @@ function _fileNameGetter(root, fileName){
 }
 
 function screenshot(selector, timeToWait, hideSelector, fileName){
+	
+	if(isNaN(Number(timeToWait)) && typeof timeToWait === 'string'){
+		fileName = timeToWait;
+		timeToWait = void 0;
+	}
+
 	casper.captureBase64('png'); // force pre-render
 	casper.wait(timeToWait || 250, function(){
 
@@ -210,7 +216,7 @@ function compareAll(exclude){
 			tests.push(test);
 		} else {
 			casper.
-			thenOpen ( "resemblejscontainer.html" , function (){
+			thenOpen ( _libraryRoot+fs.separator+"resemblejscontainer.html" , function (){
 
 				asyncCompare(baseFile, file, function(isSame, mismatch){
 
