@@ -1,7 +1,7 @@
 PhantomCSS
 ==========
 
-**CSS regression testing**. [Resemble.js](http://huddle.github.com/Resemble.js/) with [PhantomJS](http://github.com/ariya/phantomjs/) and [CasperJS](http://github.com/n1k0/casperjs) for automating visual regression testing of Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
+**CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
 ### Code
 
@@ -14,7 +14,7 @@ casper.
 		casper.click('button#open-dialog');
 		
 		// Take a screenshot of the UI component
-		phantomcss.screenshot('#the-dialog');
+		phantomcss.screenshot('#the-dialog', 'a screenshot of my dialog');
 
 	});
 ```
@@ -27,42 +27,18 @@ PhantomCSS takes screenshots captured by PhantomJS and compares them to baseline
 
 Screenshot based regression testing can only work when UI is predictable. It's possible to hide mutable UI components with PhantomCSS but it would be better to drive the UI from faked data during test runs. Take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for mocking XHR requests.
 
+### Getting started, try the demo
+
+* Mac OSX users should first [download PhantomJS](http://phantomjs.org/download.html), easiest with Homebrew.  For convenience I've included PhantomJS.exe for Windows users
+* Download or clone this repo and run `phantomjs demo/testsuite.js` in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
+* Find the screenshot folder and have a look at the (baseline) images
+* Run the tests again with `phantomjs demo/testsuite.js`. New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
+* To test failure, add/change some CSS in the file demo/coffeemachine.html e.g. make `.mug` bright green
+* Run the tests again, you should see some reported failures
+* In the failures folder some images should have been created. The images should show bright pink where the screenshot has visually changed
+* If you want to manually compare the images, go to the screenshot folder to see the original/baseline and latest screenshots
+
 ### Setup
-
-Check out the [demo](http://github.com/Huddle/PhantomCSS/tree/master/demo) for a full working example (run `phantomjs demo/testsuite.js` from the command line).
-
-```javascript
-var phantomcss = require('./modules/phantomcss.js');
-
-phantomcss.init({
-	libraryRoot: './modules/PhantomCSS',
-	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures' 
-	// If failedComparisonsRoot is not defined failure images can still 
-	// be found alongside the original and new images
-});
-
-
-var delay = 10;
-var hideElements = 'input[type=file]';
-var screenshotName = 'the_dialog'
-
-phantomcss.screenshot( "#CSS .selector" /*, delay, hideElements, screenshotName */);
-
-phantomcss.compareAll();
-```
-
-Please note that I have included the PhantomJS exe for convenience only, please follow the [PhantomJS install instructions](http://phantomjs.org/download.html) for custom and non-Windows environments.
-
-### Workflow
-
-* Define what screenshots you need in your regular tests
-* Ensure that the 'compareAll' method gets called at the end of the test run
-* Find the screenshot directory and check that they look as you expect.  These images will be used as a baseline.  Subsequent test runs will report if the latest screenshot is different to the baseline
-* Run the tests again.  New screenshots will be created to compare against the baseline image.  These new images can be ignored, they will be replaced every test run.
-* If there are test failures, image diffs will be generated.
-
-### Another example
 
 ```javascript
 
@@ -70,6 +46,9 @@ phantomcss.init({
 	libraryRoot: './modules/PhantomCSS',
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures',
+
+	// If failedComparisonsRoot is not defined failure images can still 
+	// be found alongside the original and new images
 
 	addLabelToFailedImage: false, // Don't add label to generated failure image
 
@@ -98,6 +77,15 @@ phantomcss.init({
 
 phantomcss.turnOffAnimations(); // turn off CSS transitions and jQuery animations
 
+var delay = 10;
+var hideElements = 'input[type=file]';
+var screenshotName = 'the_dialog'
+
+phantomcss.screenshot( "#CSS .selector", screenshotName);
+
+// phantomcss.screenshot( "#CSS .selector" );
+// phantomcss.screenshot( "#CSS .selector", delay, hideElements, screenshotName);
+
 phantomcss.compareAll('exclude.test'); 
 // String is converted into a Regular expression that matches on full image path
 
@@ -109,15 +97,16 @@ phantomcss.compareAll('exclude.test');
 
 ##### Name your screenshots!
 
-By default PhantomCSS creates a file called screenshot_0.png, not very helpful.  You can name your screenshot by passing a string to the forth parameter.
+By default PhantomCSS creates a file called screenshot_0.png, not very helpful.  You can name your screenshot by passing a string to either the second or forth parameter.
 
 ```javascript
 var delay, hideElementsSelector;
 
 phantomcss.screenshot("#feedback-form", delay, hideElementsSelector, "Responsive Feedback Form");
-```
 
-(I'd like to clean up the signature, but for backwards compatibility, it is what it is.)
+phantomcss.screenshot("#feedback-form", "Responsive Feedback Form");
+
+```
 
 Perhaps a better way is to use the ‘fileNameGetter’ callback property on the ‘init’ method. This does involve having a bit more structure around your tests.  See: https://github.com/Huddle/PhantomFlow/blob/master/demo/runTests.js#L72
 
