@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>PhantomFlow Demo</title>
+		<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+		<link href="http://netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.min.css" rel="stylesheet">
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.js"></script>
+		<style>
+			body {
+				padding:80px;
+			}
+			.mug {
+				font-size: 180px;
+				color: green;
+			}
+		</style>
+	</head>
+	<body>
+
+	<div id="coffee-machine-wrapper">
+		<p>Would you like a coffee?</p>
+
+		<a href="#myModal" role="button" class="btn btn-primary btn-large" id="coffee-machine-button" data-toggle="modal">Go to the Coffee Machine</a>
+
+		<!-- Modal -->
+		<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The Coffee Machine</h3>
+			</div>
+			<div class="modal-body">
+				<p class="text-center"><i class="icon-coffee mug"></i></p>
+
+				<div class="text-center alert alert-success fade in" id="latte-success" style="display: none;">
+					Here is your <strong>Latte!</strong>. Hmm, tasty!
+		        </div>
+
+		        <div class="text-center alert alert-success fade in" id="cappuccino-success" style="display: none;">
+					A frothy <strong>Cappuccino!</strong> luverly!
+		        </div>
+
+		        <div class="text-center alert fade in" id="espresso-option" style="display: none;">
+					<p><strong>Espresso!</strong> Wanna make that a double?</p>
+					<p><a class="btn" href="#" id="make-that-a-double">Yup, hit me</a> <a class="btn" href="#" id="single-is-fine">Oh no no no</a></p>
+		        </div>
+
+		        <div class="text-center alert alert-success fade in" id="single-espresso-success" style="display: none;">
+					Merry <strong>Espresso</strong> drinking.
+		        </div>
+
+				<div class="text-center alert alert-success fade in" id="double-espresso-success" style="display: none;">
+					<strong>Double Espresso!</strong>, That'll keep yer going.
+		        </div>
+
+				<div id="screen-one">
+					<br/>
+					<p class="text-center">What would you like?</p>
+
+					<p class="text-center">
+						<button class="btn btn-large btn-primary" id="cappuccino-button" type="button">Cappuccino</button>
+						<button class="btn btn-large btn-primary" id="espresso-button" type="button">Espresso</button>
+					</p>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" id="close">Close</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+
+		$('#cappuccino-button').click(function(){
+			$('#screen-one').hide();
+			$('#cappuccino-success').show();
+		});
+		$('#espresso-button').click(function(){
+			$('#screen-one').hide();
+			$('#espresso-option').show();
+		});
+
+		$('#espresso-button-from-milk-fail').click(function(){
+			$('#espresso-option').show();
+		});
+
+		$('#make-that-a-double').click(function(){
+			$('#espresso-option').hide();
+			$('#double-espresso-success').show();
+		});
+		$('#single-is-fine').click(function(){
+			$('#espresso-option').hide();
+			$('#single-espresso-success').show();
+		});
+
+		$('#myModal').on('hidden', function(){
+			$('#screen-one').show();
+			$('#espresso-option').hide();
+			$('#double-espresso-success').hide();
+			$('#single-espresso-success').hide();
+			$('#cappuccino-success').hide();
+		});
+
+	</script>
+
+	</body>
+</html>
