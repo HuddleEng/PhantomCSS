@@ -399,18 +399,24 @@ Casper.prototype.click = function click(selector) {
 
 /**
  * Emulates a click on the element having `label` as innerText. The first
- * element matching this label will be selected, so use with caution.
+ * element matching this label will be selected, unless you specify n,
+ * so use with caution.
  *
  * @param  String   label  Element innerText value
  * @param  String   tag    An element tag name (eg. `a` or `button`) (optional)
+ * @param  String   n      The nth matching occurence to use; index starts at 1 (optional)
  * @return Boolean
  */
-Casper.prototype.clickLabel = function clickLabel(label, tag) {
+Casper.prototype.clickLabel = function clickLabel(label, tag, n) {
     "use strict";
     this.checkStarted();
     tag = tag || "*";
     var escapedLabel = label.toString().replace(/"/g, '\\"');
-    var selector = selectXPath(f('//%s[text()="%s"]', tag, escapedLabel));
+    var sExpression = f('//%s[text()="%s"]', tag, escapedLabel);
+    if (n) {
+         sExpression = '(' + sExpression + ')[' + n + ']';
+    }
+    var selector = selectXPath(sExpression);
     return this.click(selector);
 };
 
