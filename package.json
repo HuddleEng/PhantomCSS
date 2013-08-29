@@ -1,0 +1,17 @@
+{
+  "name": "PhantomCSS",
+  "version": "0.0.0",
+  "description": "Visual/CSS regression testing framework",
+  "main": "phantomcss.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/marrs/PhantomCSS.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "48351e081fe8c8117b337590da5101818a0a0cf6"
+}
