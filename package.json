@@ -1,0 +1,11 @@
+{
+  "name": "PhantomCSS",
+  "version": "0.0.1",
+  "description": "Visual/CSS regression testing with PhantomJS",
+  "main": "phantomcss.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Huddle/PhantomCSS.git"
+  },
+  "license": "MIT"
+}
