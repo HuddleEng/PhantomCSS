@@ -345,13 +345,13 @@ function initClient(){
 }
 
 function _onPass(test){
-	// console.log('.'); just for progress indication
+	casper.test.pass('No changes found for screenshot ' + test.filename);
 }
 function _onFail(test){
-	console.log('FAILED: ('+test.mismatch+'% mismatch)', test.filename, '\n');
+	casper.test.fail('Visual change found for screenshot ' + test.filename + ' (' + test.mismatch + '% mismatch)');
 }
 function _onTimeout(test){
-	console.log('TIMEOUT: ', test.filename, '\n');
+	casper.test.info('Could not complete image comparison for ' + test.filename);
 }
 function _onComplete(tests, noOfFails, noOfErrors){
 
