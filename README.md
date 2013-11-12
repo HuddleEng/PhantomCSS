@@ -21,7 +21,7 @@ casper.
 
 From the command line/terminal run
 
-* On windows `casperjs demo/testsuite.js`
+* On Windows `casperjs demo/testsuite.js`
 * On Mac OSX `casperjs test demo/testsuite.js`
 
 ### How?
