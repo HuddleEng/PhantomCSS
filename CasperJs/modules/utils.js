@@ -28,7 +28,9 @@
  *
  */
 
-/*global CasperError console exports phantom require*/
+/*global CasperError, console, exports, phantom, patchRequire, require:true*/
+
+var require = patchRequire(require);
 
 /**
  * Provides a better typeof operator equivalent, able to retrieve the array
@@ -50,7 +52,17 @@ function betterTypeOf(input) {
             return 'null';
         default:
         try {
-            return Object.prototype.toString.call(input).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
+            var type = Object.prototype.toString.call(input).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
+            if (type === 'object' &&
+                phantom.casperEngine !== "phantomjs" &&
+                '__type' in input) {
+                type = input.__type;
+            }
+            // gecko returns window instead of domwindow
+            else if (type === 'window') {
+                return 'domwindow';
+            }
+            return type;
         } catch (e) {
             return typeof input;
         }
@@ -88,6 +100,30 @@ function clone(o) {
 exports.clone = clone;
 
 /**
+ * Computes a modifier string to its PhantomJS equivalent. A modifier string is
+ * in the form "ctrl+alt+shift".
+ *
+ * @param  String  modifierString  Modifier string, eg. "ctrl+alt+shift"
+ * @param  Object  modifiers       Modifiers definitions
+ * @return Number
+ */
+function computeModifier(modifierString, modifiers) {
+    "use strict";
+    var modifier = 0,
+        checkKey = function(key) {
+            if (key in modifiers) return;
+            throw new CasperError(format('%s is not a supported key modifier', key));
+        };
+    if (!modifierString) return modifier;
+    var keys = modifierString.split('+');
+    keys.forEach(checkKey);
+    return keys.reduce(function(acc, key) {
+        return acc | modifiers[key];
+    }, modifier);
+}
+exports.computeModifier = computeModifier;
+
+/**
  * Dumps a JSON representation of passed value to the console. Used for
  * debugging purpose only.
  *
@@ -111,8 +147,10 @@ function equals(v1, v2) {
     if (isFunction(v1)) {
         return v1.toString() === v2.toString();
     }
-    if (v1 instanceof Object) {
-        if (Object.keys(v1).length !== Object.keys(v2).length) {
+    // with Gecko, instanceof is not enough to test object
+    if (v1 instanceof Object || isObject(v1)) {
+        if (!(v2 instanceof Object || isObject(v2)) ||
+            Object.keys(v1).length !== Object.keys(v2).length) {
             return false;
         }
         for (var k in v1) {
@@ -196,6 +234,43 @@ function format(f) {
 exports.format = format;
 
 /**
+ * Formats a test value.
+ *
+ * @param  Mixed  value
+ * @return String
+ */
+function formatTestValue(value, name) {
+    "use strict";
+    var formatted = '';
+    if (value instanceof Error) {
+        formatted += value.message + '\n';
+        if (value.stack) {
+            formatted += indent(value.stack, 12, '#');
+        }
+    } else if (name === 'stack') {
+        if (isArray(value)) {
+            formatted += value.map(function(entry) {
+                return format('in %s() in %s:%d', (entry['function'] || "anonymous"), entry.file, entry.line);
+            }).join('\n');
+        } else {
+            formatted += 'not provided';
+        }
+    } else {
+        try {
+            formatted += serialize(value);
+        } catch (e) {
+            try {
+                formatted += serialize(value.toString());
+            } catch (e2) {
+                formatted += '(unserializable value)';
+            }
+        }
+    }
+    return formatted;
+}
+exports.formatTestValue = formatTestValue;
+
+/**
  * Retrieves the value of an Object foreign property using a dot-separated
  * path string.
  *
@@ -220,6 +295,22 @@ function getPropertyPath(obj, path) {
     return value;
 }
 exports.getPropertyPath = getPropertyPath;
+
+/**
+ * Indents a string.
+ *
+ * @param  String  string
+ * @param  Number  nchars
+ * @param  String  prefix
+ * @return String
+ */
+function indent(string, nchars, prefix) {
+    "use strict";
+    return string.split('\n').map(function(line) {
+        return (prefix || '') + new Array(nchars).join(' ') + line;
+    }).join('\n');
+}
+exports.indent = indent;
 
 /**
  * Inherit the prototype methods from one constructor into another.
@@ -445,7 +536,7 @@ function isValidSelector(value) {
             // phantomjs env has a working document object, let's use it
             document.querySelector(value);
         } catch(e) {
-            if ('name' in e && e.name === 'SYNTAX_ERR') {
+            if ('name' in e && (e.name === 'SYNTAX_ERR' || e.name === 'SyntaxError')) {
                 return false;
             }
         }
@@ -478,6 +569,32 @@ function isWebPage(what) {
 }
 exports.isWebPage = isWebPage;
 
+
+
+function isPlainObject(obj) {
+    "use strict";
+    if (!obj || typeof(obj) !== 'object')
+        return false;
+    var type = Object.prototype.toString.call(obj).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
+    return (type === 'object');
+}
+
+function mergeObjectsInSlimerjs(origin, add) {
+    "use strict";
+    for (var p in add) {
+        if (isPlainObject(add[p])) {
+            if (isPlainObject(origin[p])) {
+                origin[p] = mergeObjects(origin[p], add[p]);
+            } else {
+                origin[p] = clone(add[p]);
+            }
+        } else {
+            origin[p] = add[p];
+        }
+    }
+    return origin;
+}
+
 /**
  * Object recursive merging utility.
  *
@@ -487,6 +604,13 @@ exports.isWebPage = isWebPage;
  */
 function mergeObjects(origin, add) {
     "use strict";
+
+    if (phantom.casperEngine === 'slimerjs') {
+        // Because of an issue in the module system of slimerjs (security membranes?)
+        // constructor is undefined.
+        // let's use an other algorithm
+        return mergeObjectsInSlimerjs(origin, add);
+    }
     for (var p in add) {
         if (add[p] && add[p].constructor === Object) {
             if (origin[p] && origin[p].constructor === Object) {
@@ -547,6 +671,22 @@ function objectValues(obj) {
     });
 }
 exports.objectValues = objectValues;
+
+/**
+ * Prepares a string for xpath expression with the condition [text()=].
+ *
+ * @param  String  string
+ * @return String
+ */
+function quoteXPathAttributeString(string) {
+    "use strict";
+    if (/"/g.test(string)) {
+        return 'concat("' + string.toString().replace(/"/g, '", \'"\', "') + '")';
+    } else {
+        return '"' + string + '"';
+    }
+}
+exports.quoteXPathAttributeString = quoteXPathAttributeString;
 
 /**
  * Serializes a value using JSON.

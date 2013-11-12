@@ -28,10 +28,12 @@
  *
  */
 
-/*global CasperError console exports phantom require*/
+/*global CasperError, console, exports, phantom, patchRequire, require:true*/
 
+var require = patchRequire(require);
 var utils = require('utils');
 var fs = require('fs');
+var TestSuiteResult = require('tester').TestSuiteResult;
 
 /**
  * Generates a value for 'classname' attribute of the JUnit XML report.
@@ -44,7 +46,7 @@ var fs = require('fs');
  */
 function generateClassName(classname) {
     "use strict";
-    classname = classname.replace(phantom.casperPath, "").trim();
+    classname = (classname || "").replace(phantom.casperPath, "").trim();
     var script = classname || phantom.casperScript || "";
     if (script.indexOf(fs.workingDirectory) === 0) {
         script = script.substring(fs.workingDirectory.length + 1);
@@ -55,12 +57,10 @@ function generateClassName(classname) {
     if (~script.indexOf('.')) {
         script = script.substring(0, script.lastIndexOf('.'));
     }
-
     // If we have trimmed our string down to nothing, default to script name
     if (!script && phantom.casperScript) {
-      script = phantom.casperScript;
+        script = phantom.casperScript;
     }
-
     return script || "unknown";
 }
 
@@ -80,69 +80,13 @@ exports.create = function create() {
  */
 function XUnitExporter() {
     "use strict";
-    this._xml = utils.node('testsuite');
+    this.results = undefined;
+    this._xml = utils.node('testsuites');
     this._xml.toString = function toString() {
-        return this.outerHTML; // ouch
+        return '<?xml version="1.0" encoding="UTF-8"?>' + this.outerHTML; // ouch
     };
 }
 exports.XUnitExporter = XUnitExporter;
-
-/**
- * Adds a successful test result.
- *
- * @param  String  classname
- * @param  String  name
- * @param  Number  duration  Test duration in milliseconds
- */
-XUnitExporter.prototype.addSuccess = function addSuccess(classname, name, duration) {
-    "use strict";
-    var snode = utils.node('testcase', {
-        classname: generateClassName(classname),
-        name: name
-    });
-    if (duration !== undefined) {
-        snode.setAttribute('time', utils.ms2seconds(duration));
-    }
-    this._xml.appendChild(snode);
-};
-
-/**
- * Adds a failed test result.
- *
- * @param  String  classname
- * @param  String  name
- * @param  String  message
- * @param  String  type
- * @param  Number  duration  Test duration in milliseconds
- */
-XUnitExporter.prototype.addFailure = function addFailure(classname, name, message, type, duration) {
-    "use strict";
-    var fnode = utils.node('testcase', {
-        classname: generateClassName(classname),
-        name:      name
-    });
-    if (duration !== undefined) {
-        fnode.setAttribute('time', utils.ms2seconds(duration));
-    }
-    var failure = utils.node('failure', {
-        type: type || "unknown"
-    });
-    failure.appendChild(document.createTextNode(message || "no message left"));
-    fnode.appendChild(failure);
-    this._xml.appendChild(fnode);
-};
-
-/**
- * Adds test suite duration
- *
- * @param  Number  duration  Test duration in milliseconds
- */
-XUnitExporter.prototype.setSuiteDuration = function setSuiteDuration(duration) {
-    "use strict";
-    if (!isNaN(duration)) {
-        this._xml.setAttribute("time", utils.ms2seconds(duration));
-    }
-};
 
 /**
  * Retrieves generated XML object - actually an HTMLElement.
@@ -151,5 +95,77 @@ XUnitExporter.prototype.setSuiteDuration = function setSuiteDuration(duration) {
  */
 XUnitExporter.prototype.getXML = function getXML() {
     "use strict";
+    if (!(this.results instanceof TestSuiteResult)) {
+        throw new CasperError('Results not set, cannot get XML.');
+    }
+    this.results.forEach(function(result) {
+        var suiteNode = utils.node('testsuite', {
+            name: result.name,
+            tests: result.assertions,
+            failures: result.failed,
+            errors: result.crashed,
+            time: utils.ms2seconds(result.calculateDuration()),
+            timestamp: (new Date()).toISOString(),
+            'package': generateClassName(result.file)
+        });
+        // succesful test cases
+        result.passes.forEach(function(success) {
+            var testCase = utils.node('testcase', {
+                name: success.message || success.standard,
+                classname: generateClassName(success.file),
+                time: utils.ms2seconds(~~success.time)
+            });
+            suiteNode.appendChild(testCase);
+        });
+        // failed test cases
+        result.failures.forEach(function(failure) {
+            var testCase = utils.node('testcase', {
+                name: failure.message || failure.standard,
+                classname: generateClassName(failure.file),
+                time: utils.ms2seconds(~~failure.time)
+            });
+            var failureNode = utils.node('failure', {
+                type: failure.type || "failure"
+            });
+            failureNode.appendChild(document.createTextNode(failure.message || "no message left"));
+            if (failure.values && failure.values.error instanceof Error) {
+                var errorNode = utils.node('error', {
+                    type: utils.betterTypeOf(failure.values.error)
+                });
+                errorNode.appendChild(document.createTextNode(failure.values.error.stack));
+                testCase.appendChild(errorNode);
+            }
+            testCase.appendChild(failureNode);
+            suiteNode.appendChild(testCase);
+        });
+        // errors
+        result.errors.forEach(function(error) {
+            var errorNode = utils.node('error', {
+                type: error.name
+            });
+            errorNode.appendChild(document.createTextNode(error.stack ? error.stack : error.message));
+            suiteNode.appendChild(errorNode);
+        });
+        // warnings
+        var warningNode = utils.node('system-out');
+        warningNode.appendChild(document.createTextNode(result.warnings.join('\n')));
+        suiteNode.appendChild(warningNode);
+        this._xml.appendChild(suiteNode);
+    }.bind(this));
+    this._xml.setAttribute('duration', utils.ms2seconds(this.results.calculateDuration()));
     return this._xml;
+};
+
+/**
+ * Sets test results.
+ *
+ * @param TestSuite  results
+ */
+XUnitExporter.prototype.setResults = function setResults(results) {
+    "use strict";
+    if (!(results instanceof TestSuiteResult)) {
+        throw new CasperError('Invalid results type.');
+    }
+    this.results = results;
+    return results;
 };

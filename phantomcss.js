@@ -8,12 +8,12 @@ More: http://tldr.huddle.com/blog/css-testing/
 
 var fs = require('fs');
 
-var _root = '.';
-var _diffRoot = false;
+var _root = '.'+fs.separator+'screenshots';
+var _diffRoot = '.'+fs.separator+'failures';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _libraryRoot = '.';
+var _libraryRoot = '.'+fs.separator+'ResembleJs';
 var exitStatus;
 var _hideElements;
 var _addLabelToFailedImage = true;
@@ -29,6 +29,9 @@ exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
 
 function init(options){
+
+	options = options || {};
+
 	casper = options.casper || casper;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	_root = options.screenshotRoot || _root;
@@ -215,10 +218,13 @@ function compareAll(exclude){
 			errors++;
 			tests.push(test);
 		} else {
+
 			casper.
 			thenOpen ( _libraryRoot+fs.separator+"resemblejscontainer.html" , function (){
 
 				asyncCompare(baseFile, file, function(isSame, mismatch){
+
+					tests.push(test);
 
 					if(!isSame){
 
@@ -227,7 +233,8 @@ function compareAll(exclude){
 
 						if(mismatch){
 							test.mismatch = mismatch;
-							_onFail(test);
+							_onFail(test); // casper.test.fail throws and error, this function call is aborted
+							return;  // Just to make it clear what is happening
 						} else {
 							_onTimeout(test);
 						}
@@ -270,7 +277,6 @@ function compareAll(exclude){
 						_onPass(test);
 					}
 
-					tests.push(test);
 				});
 			});
 		}
@@ -281,7 +287,9 @@ function compareAll(exclude){
 			return _diffsToProcess.length === tests.length;
 		}, function(){
 			_onComplete(tests, fails, errors);
-		}, function(){},
+		}, function(){
+
+		},
 		10000);
 	});
 }
@@ -317,8 +325,13 @@ function initClient(){
 		function run(label){
 
 			function render(data){
-				document.getElementById('image-diff').innerHTML = '<img src="'+data.getImageDataUrl(label)+'"/>';
-				window._imagediff_.hasImage = true;
+				var img = new Image();
+
+				img.onload = function(){
+					window._imagediff_.hasImage = true;
+				};
+				document.getElementById('image-diff').appendChild(img);
+				img.src = data.getImageDataUrl(label);
 			}
 
 			resemble(document.getElementById('image-diff-one').files[0]).
@@ -345,12 +358,15 @@ function initClient(){
 }
 
 function _onPass(test){
+	console.log('\n');
 	casper.test.pass('No changes found for screenshot ' + test.filename);
 }
 function _onFail(test){
+	console.log('\n');
 	casper.test.fail('Visual change found for screenshot ' + test.filename + ' (' + test.mismatch + '% mismatch)');
 }
 function _onTimeout(test){
+	console.log('\n');
 	casper.test.info('Could not complete image comparison for ' + test.filename);
 }
 function _onComplete(tests, noOfFails, noOfErrors){
@@ -362,15 +378,13 @@ function _onComplete(tests, noOfFails, noOfErrors){
 		console.log("The next time you run these tests, new screenshots will be taken.  These screenshots will be compared to the original.");
 		console.log('If they are different, PhantomCSS will report a failure.');
 	} else {
-		
-		console.log("\nPhantomCSS found: " + tests.length + " tests.");
-		
+				
 		if(noOfFails === 0){
-			console.log("None of them failed. Which is good right?");
-			console.log("If you want to make them fail, go change some CSS - weirdo.");
+			console.log("\nPhantomCSS found " + tests.length + " tests, None of them failed. Which is good right?");
+			console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
 		} else {
-			console.log(noOfFails + ' of them failed.');
-			console.log('PhantomCSS has created some images that try to show the difference (in the directory '+_diffRoot+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
+			console.log("\nPhantomCSS found " + tests.length + " tests, " + noOfFails + ' of them failed.');
+			console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_diffRoot+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
 		}
 
 		if(noOfErrors !== 0){

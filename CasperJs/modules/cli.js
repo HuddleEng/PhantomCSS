@@ -28,10 +28,11 @@
  *
  */
 
-/*global CasperError console exports phantom require*/
+/*global CasperError, console, exports, phantom, patchRequire, require:true*/
 
-var system = require('system');
+var require = patchRequire(require);
 var utils = require('utils');
+var system = require('system');
 
 /**
  * Extracts, normalize ad organize PhantomJS CLI arguments in a dedicated
@@ -55,39 +56,47 @@ exports.parse = function parse(phantomArgs) {
                 this.args = this.args.filter(function _filter(arg, index) {
                     return index !== what;
                 });
+                // raw
+                if ('raw' in this) {
+                    this.raw.args = this.raw.args.filter(function _filter(arg, index) {
+                        return index !== what;
+                    });
+                }
             } else if (utils.isString(what)) {
                 // deleting an arg by its value
                 this.args = this.args.filter(function _filter(arg) {
                     return arg !== what;
                 });
                 // deleting an option by its name (key)
-                var self = this;
-                Object.keys(this.options).forEach(function _forEach(option) {
-                    if (option === what) {
-                        delete self.options[what];
-                    }
-                });
+                delete this.options[what];
+                // raw
+                if ('raw' in this) {
+                    this.raw.args = this.raw.args.filter(function _filter(arg) {
+                        return arg !== what;
+                    });
+                    delete this.raw.options[what];
+                }
             } else {
-                throw new CasperError("cannot drop argument of type " + typeof what);
+                throw new CasperError("Cannot drop argument of type " + typeof what);
             }
         },
         has: function has(what) {
             if (utils.isNumber(what)) {
                 return what in this.args;
-            } else if (utils.isString(what)) {
+            }
+            if (utils.isString(what)) {
                 return what in this.options;
-            } else {
-                throw new CasperError("Unsupported cli arg tester " + typeof what);
             }
+            throw new CasperError("Unsupported cli arg tester " + typeof what);
         },
-        get: function get(what) {
+        get: function get(what, def) {
             if (utils.isNumber(what)) {
-                return this.args[what];
-            } else if (utils.isString(what)) {
-                return this.options[what];
-            } else {
-                throw new CasperError("Unsupported cli arg getter " + typeof what);
+                return what in this.args ? this.args[what] : def;
             }
+            if (utils.isString(what)) {
+                return what in this.options ? this.options[what] : def;
+            }
+            throw new CasperError("Unsupported cli arg getter " + typeof what);
         }
     };
     phantomArgs.forEach(function _forEach(arg) {
@@ -107,11 +116,13 @@ exports.parse = function parse(phantomArgs) {
         } else {
             // positional arg
             extract.args.push(castArgument(arg));
-            extract.raw.args.push(castArgument(arg));
+            extract.raw.args.push(arg);
         }
     });
     extract.raw = utils.mergeObjects(extract.raw, {
-        drop: extract.drop,
+        drop: function() {
+            return extract.drop.apply(extract, arguments);
+        },
         has: extract.has,
         get: extract.get
     });

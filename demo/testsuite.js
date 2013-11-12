@@ -3,10 +3,6 @@
 	Initialise CasperJs
 */
 
-phantom.casperPath = 'CasperJs';
-phantom.injectJs(phantom.casperPath + '/bin/bootstrap.js');
-phantom.injectJs('jquery.js');
-
 var casper = require('casper').create({
 	viewportSize: {
 		width: 1027,
@@ -16,22 +12,32 @@ var casper = require('casper').create({
 
 /*
 	Require and initialise PhantomCSS module
+	Paths are relative to CasperJs directory
 */
 
-var phantomcss = require('./phantomcss.js');
-var url = startServer('demo/coffeemachine.html');
+var phantomcss = require('./../phantomcss.js');
+//var url = startServer('./demo/coffeemachine.html');
 
-phantomcss.init({
-	screenshotRoot: './screenshots',
-	failedComparisonsRoot: './failures'
-});
+phantomcss.init(/*{
+	screenshotRoot: '/screenshots',
+	failedComparisonsRoot: '/failures'
+	casper: specific_instance_of_casper,
+	libraryRoot: '/phantomcss',
+	fileNameGetter: function overide_file_naming(){},
+	onPass: function passCallback(){},
+	onFail: function failCallback(){},
+	onTimeout: function timeoutCallback(){},
+	onComplete: function completeCallback(){},
+	hideElements: '#thing.selector',
+	addLabelToFailedImage: true
+}*/);
 
 /*
 	The test scenario
 */
 
 casper.
-	start( url ).
+	start( './demo/coffeemachine.html' ).
 	then(function(){
 		phantomcss.screenshot('#coffee-machine-wrapper', 'open coffee machine button');
 	}).
@@ -39,7 +45,6 @@ casper.
 		casper.click('#coffee-machine-button');
 		
 		// wait for modal to fade-in 
-
 		casper.waitForSelector('#myModal:not([style*="display: none"])',
 			function success(){
 				phantomcss.screenshot('#myModal', 'coffee machine dialog');
@@ -58,7 +63,6 @@ casper.
 		casper.click('#close');
 
 		// wait for modal to fade-out
-
 		casper.waitForSelector('#myModal[style*="display: none"]',
 			function success(){
 				phantomcss.screenshot('#coffee-machine-wrapper', 'coffee machine close success');
@@ -79,24 +83,6 @@ casper.
 	}).
 	run( function end_it(){
 		console.log('\nTHE END.');
+		
 		phantom.exit(phantomcss.getExitStatus());
 	});
-
-/*
-	Fluff
-*/
-
-function startServer(path){
-	// Use PhantomJs server to server web page, demo purposes only
-	var fs = require('fs');
-	var server = require('webserver').create();
-	var html = fs.read(path);
-	
-	var service = server.listen(1337, function(request, response) {
-		response.statusCode = 200;
-		response.write(html);
-		response.close();
-	});
-
-	return 'http://localhost:1337';
-}

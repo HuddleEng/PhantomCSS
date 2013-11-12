@@ -1,8 +1,23 @@
-# CasperJS [![Build Status](https://secure.travis-ci.org/n1k0/casperjs.png)](http://travis-ci.org/n1k0/casperjs)
+# CasperJS
 
-CasperJS is a navigation scripting & testing utility for [PhantomJS](http://www.phantomjs.org/).
-It eases the process of defining a full navigation scenario and provides useful
-high-level functions, methods & syntaxic sugar for doing common tasks such as:
+>**Important note:** the `master` branch hosts the development version of CasperJS, which is now pretty stable and should be the right version to use if you ask me.
+>
+>Use the [`1.0` branch](https://github.com/n1k0/casperjs/tree/1.0) if you want to keep in sync with the stable old version, or [use tagged versions](https://github.com/n1k0/casperjs/tags).
+>
+>Currently, available documentation is:
+>
+>- **hosted on [docs.casperjs.org](http://docs.casperjs.org/) for the development branch**
+>- hosted on [casperjs.org](http://casperjs.org/) for the 1.0 branch
+>
+>[Travis-CI](http://travis-ci.org/n1k0/casperjs) build status:
+>
+>- ![Build Status](https://travis-ci.org/n1k0/casperjs.png?branch=master) `master` branch
+>- 1.0 tests unfortunately have to be run manually using the `casperjs selftest` command
+
+CasperJS is a navigation scripting & testing utility for [PhantomJS](http://www.phantomjs.org/)
+and [SlimerJS](http://slimerjs.org/). It eases the process of defining a full navigation
+scenario and provides useful high-level functions, methods & syntaxic sugar for doing common
+tasks such as:
 
 - defining & ordering [navigation steps](http://casperjs.org/quickstart.html)
 - [filling forms](http://casperjs.org/api.html#casper.fill)
@@ -28,22 +43,28 @@ Follow the CasperJS project [on twitter](https://twitter.com/casperjs_org) and [
 Sample test to see if some dropdown can be opened:
 
 ```javascript
-casper.start('http://twitter.github.com/bootstrap/javascript.html#dropdowns', function() {
-    this.test.assertExists('#navbar-example');
-    this.click('#dropdowns .nav-pills .dropdown:last-of-type a.dropdown-toggle');
-    this.waitUntilVisible('#dropdowns .nav-pills .open', function() {
-        this.test.pass('Dropdown is open');
+casper.test.begin('a twitter bootsrap dropdown can be opened', 2, function(test) {
+    casper.start('http://twitter.github.com/bootstrap/javascript.html#dropdowns', function() {
+        test.assertExists('#navbar-example');
+        this.click('#dropdowns .nav-pills .dropdown:last-of-type a.dropdown-toggle');
+        this.waitUntilVisible('#dropdowns .nav-pills .open', function() {
+            test.pass('Dropdown is open');
+        });
+    }).run(function() {
+        test.done();
     });
-});
-
-casper.run(function() {
-    this.test.done();
 });
 ```
 
 Run the script:
 
-![](http://cl.ly/image/112m0F2n162i/Capture%20d%E2%80%99%C3%A9cran%202012-10-19%20%C3%A0%2016.37.15.png)
+![](http://cl.ly/image/271e2i403A0F/Capture%20d%E2%80%99%C3%A9cran%202013-01-20%20%C3%A0%2009.26.15.png)
+
+##Support
+
+If you're having problems with using the project, use the support forum at CodersClan.
+
+<a href="http://codersclan.net/forum/index.php?repo_id=32"><img src="http://www.codersclan.net/graphics/getSupport_blue_big.png" width="160"></a>
 
 ## Contributing
 
