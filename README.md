@@ -3,7 +3,7 @@ PhantomCSS
 
 **CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
-### Code
+### Example
 
 ```javascript
 casper.
@@ -19,9 +19,14 @@ casper.
 	});
 ```
 
+From the command line/terminal run
+
+* On windows `casperjs demo/testsuite.js`
+* On Mac OSX `casperjs test demo/testsuite.js`
+
 ### How?
 
-PhantomCSS takes screenshots captured by PhantomJS and compares them to baseline images using [Resemble.js](http://huddle.github.com/Resemble.js/) to test for rgb pixel differences. PhantomCSS then generates image diffs to help you find the cause.
+PhantomCSS takes screenshots captured by CasperJS and compares them to baseline images using [Resemble.js](http://huddle.github.com/Resemble.js/) to test for rgb pixel differences. PhantomCSS then generates image diffs to help you find the cause.
 
 ![A failed visual regression test, pink areas show where padding has changed.](https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/intro-example.png "Failed visual regression test")
 
@@ -29,10 +34,10 @@ Screenshot based regression testing can only work when UI is predictable. It's p
 
 ### Getting started, try the demo
 
-* Mac OSX users should first [download PhantomJS](http://phantomjs.org/download.html), easiest with Homebrew.  For convenience I've included PhantomJS.exe for Windows users
-* Download or clone this repo and run `phantomjs demo/testsuite.js` in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
+* Mac OSX users should first [download CasperJS](http://docs.casperjs.org/en/latest/installation.html), easiest with Homebrew.  For convenience I've included CasperJS.bat for Windows users
+* Download or clone this repo and run `casperjs demo/testsuite.js` (windows) or `casperjs test demo/testsuite.js` (OSX) in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
 * Find the screenshot folder and have a look at the (baseline) images
-* Run the tests again with `phantomjs demo/testsuite.js`. New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
+* Run the tests again with `casperjs demo/testsuite.js` (windows) or `casperjs test demo/testsuite.js` (OSX). New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
 * To test failure, add/change some CSS in the file demo/coffeemachine.html e.g. make `.mug` bright green
 * Run the tests again, you should see some reported failures
 * In the failures folder some images should have been created. The images should show bright pink where the screenshot has visually changed

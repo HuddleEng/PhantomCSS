@@ -14,9 +14,7 @@ var casper = require('casper').create({
 	Require and initialise PhantomCSS module
 	Paths are relative to CasperJs directory
 */
-
 var phantomcss = require('./../phantomcss.js');
-//var url = startServer('./demo/coffeemachine.html');
 
 phantomcss.init(/*{
 	screenshotRoot: '/screenshots',
@@ -32,57 +30,63 @@ phantomcss.init(/*{
 	addLabelToFailedImage: true
 }*/);
 
+
 /*
 	The test scenario
 */
+casper.start( './demo/coffeemachine.html' );
 
-casper.
-	start( './demo/coffeemachine.html' ).
-	then(function(){
-		phantomcss.screenshot('#coffee-machine-wrapper', 'open coffee machine button');
-	}).
-	then(function(){
-		casper.click('#coffee-machine-button');
-		
-		// wait for modal to fade-in 
-		casper.waitForSelector('#myModal:not([style*="display: none"])',
-			function success(){
-				phantomcss.screenshot('#myModal', 'coffee machine dialog');
-			},
-			function timeout(){
-				casper.test.fail('Should see coffee machine');
-			}
-		);
+casper.then(function(){
+	phantomcss.screenshot('#coffee-machine-wrapper', 'open coffee machine button');
+});
 
-	}).
-	then(function(){
-		casper.click('#cappuccino-button');
-		phantomcss.screenshot('#myModal', 'cappuccino success');
-	}).
-	then(function(){
-		casper.click('#close');
+casper.then(function(){
+	casper.click('#coffee-machine-button');
+	
+	// wait for modal to fade-in 
+	casper.waitForSelector('#myModal:not([style*="display: none"])',
+		function success(){
+			phantomcss.screenshot('#myModal', 'coffee machine dialog');
+		},
+		function timeout(){
+			casper.test.fail('Should see coffee machine');
+		}
+	);
+});
 
-		// wait for modal to fade-out
-		casper.waitForSelector('#myModal[style*="display: none"]',
-			function success(){
-				phantomcss.screenshot('#coffee-machine-wrapper', 'coffee machine close success');
-			},
-			function timeout(){
-				casper.test.fail('Should be able to walk away from the coffee machine');
-			}
-		);
-	});
+casper.then(function(){
+	casper.click('#cappuccino-button');
+	phantomcss.screenshot('#myModal', 'cappuccino success');
+});
+
+casper.then(function(){
+	casper.click('#close');
+
+	// wait for modal to fade-out
+	casper.waitForSelector('#myModal[style*="display: none"]',
+		function success(){
+			phantomcss.screenshot('#coffee-machine-wrapper', 'coffee machine close success');
+		},
+		function timeout(){
+			casper.test.fail('Should be able to walk away from the coffee machine');
+		}
+	);
+});
+
+casper.then( function now_check_the_screenshots(){
+	// compare screenshots
+	phantomcss.compareAll();
+});
+
+casper.then( function end_it(){
+	casper.test.done();
+});
 
 /*
-	End tests and compare screenshots
+Casper runs tests
 */
+casper.run(function(){
+	console.log('\nTHE END.');
+	phantom.exit(phantomcss.getExitStatus());
+});
 
-casper.
-	then( function now_check_the_screenshots(){
-		phantomcss.compareAll();
-	}).
-	run( function end_it(){
-		console.log('\nTHE END.');
-		
-		phantom.exit(phantomcss.getExitStatus());
-	});

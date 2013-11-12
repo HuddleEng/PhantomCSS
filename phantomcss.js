@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 22 Oct 2013
+Last updated date: 12 Nov 2013
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -231,14 +231,6 @@ function compareAll(exclude){
 						test.fail = true;
 						fails++;
 
-						if(mismatch){
-							test.mismatch = mismatch;
-							_onFail(test); // casper.test.fail throws and error, this function call is aborted
-							return;  // Just to make it clear what is happening
-						} else {
-							_onTimeout(test);
-						}
-
 						casper.waitFor(
 							function check() {
 								return casper.evaluate(function(){
@@ -269,6 +261,14 @@ function compareAll(exclude){
 								casper.evaluate(function(){
 									window._imagediff_.hasImage = false;
 								});
+
+								if(mismatch){
+									test.mismatch = mismatch;
+									_onFail(test); // casper.test.fail throws and error, this function call is aborted
+									return;  // Just to make it clear what is happening
+								} else {
+									_onTimeout(test);
+								}
 
 							}, function(){},
 							10000
