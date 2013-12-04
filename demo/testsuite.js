@@ -2,7 +2,7 @@
 	Require and initialise PhantomCSS module
 	Paths are relative to CasperJs directory
 */
-var phantomcss = require('./../phantomcss.js');
+var phantomcss = require('./phantomcss.js');
 
 phantomcss.init(/*{
 	screenshotRoot: '/screenshots',
@@ -32,8 +32,8 @@ casper.then(function(){
 
 casper.then(function(){
 	casper.click('#coffee-machine-button');
-	
-	// wait for modal to fade-in 
+
+	// wait for modal to fade-in
 	casper.waitForSelector('#myModal:not([style*="display: none"])',
 		function success(){
 			phantomcss.screenshot('#myModal', 'coffee machine dialog');
