@@ -1,15 +1,3 @@
-
-/*
-	Initialise CasperJs
-*/
-
-var casper = require('casper').create({
-	viewportSize: {
-		width: 1027,
-		height: 800
-	}
-});
-
 /*
 	Require and initialise PhantomCSS module
 	Paths are relative to CasperJs directory
@@ -35,6 +23,8 @@ phantomcss.init(/*{
 	The test scenario
 */
 casper.start( './demo/coffeemachine.html' );
+
+casper.viewport(1024, 768);
 
 casper.then(function(){
 	phantomcss.screenshot('#coffee-machine-wrapper', 'open coffee machine button');
