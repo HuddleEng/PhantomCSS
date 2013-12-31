@@ -13,7 +13,7 @@ var _diffRoot = '.'+fs.separator+'failures';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _libraryRoot = '.'+fs.separator+'ResembleJs';
+var _libraryRoot = '.';
 var exitStatus;
 var _hideElements;
 var _addLabelToFailedImage = true;
@@ -220,7 +220,7 @@ function compareAll(exclude){
 		} else {
 
 			casper.
-			thenOpen ( _libraryRoot+fs.separator+"resemblejscontainer.html" , function (){
+			thenOpen ( _libraryRoot+fs.separator+"ResembleJs"+fs.separator+"resemblejscontainer.html" , function (){
 
 				asyncCompare(baseFile, file, function(isSame, mismatch){
 
@@ -296,7 +296,7 @@ function compareAll(exclude){
 
 function initClient(){
 
-	casper.page.injectJs(_libraryRoot+fs.separator+'resemble.js');
+	casper.page.injectJs(_libraryRoot+fs.separator+'ResembleJs'+fs.separator+'resemble.js');
 
 	casper.evaluate(function(){
 		
