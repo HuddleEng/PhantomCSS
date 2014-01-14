@@ -58,6 +58,11 @@ phantomcss.init({
 
 	addLabelToFailedImage: false, // Don't add label to generated failure image
 
+	/*
+		Mismatch tolerance defaults to  0.05%. Increasing this value will decrease test coverage
+	*/
+	mismatchTolerance: 0.05,
+
 	onFail: function(test){ console.log(test.filename, test.mismatch); },
 	onPass: function(){ console.log(test.filename); },
 	onTimeout: function(){ console.log(test.filename); },

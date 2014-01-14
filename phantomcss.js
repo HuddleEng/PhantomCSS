@@ -19,6 +19,7 @@ var _hideElements;
 var _addLabelToFailedImage = true;
 var _test_match;
 var _test_exclude;
+var _mismatchTolerance = 0.05;
 var diffsCreated = [];
 
 exports.screenshot = screenshot;
@@ -48,6 +49,8 @@ function init(options){
 	_onComplete = options.onComplete || options.report || _onComplete;
 
 	_hideElements = options.hideElements;
+
+	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
 
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
@@ -334,7 +337,7 @@ function initClient(){
 
 	casper.page.injectJs(_libraryRoot+fs.separator+'ResembleJs'+fs.separator+'resemble.js');
 
-	casper.evaluate(function(){
+	casper.evaluate(function(mismatchTolerance){
 		
 		var result;
 
@@ -376,7 +379,7 @@ function initClient(){
 				onComplete(function(data){
 					var diffImage;
 
-					if(Number(data.misMatchPercentage) > 0.05){
+					if(Number(data.misMatchPercentage) > mismatchTolerance){
 						result = data.misMatchPercentage;
 					} else {
 						result = false;
@@ -384,12 +387,14 @@ function initClient(){
 
 					window._imagediff_.hasResult = true;
 
-					if(Number(data.misMatchPercentage) > 0.05){
+					if(Number(data.misMatchPercentage) > mismatchTolerance){
 						render(data);
 					}
 					
 				});
 		}
+	}, {
+		mismatchTolerance: _mismatchTolerance
 	});
 }
 
