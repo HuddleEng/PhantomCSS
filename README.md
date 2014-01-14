@@ -52,8 +52,9 @@ phantomcss.init({
 	screenshotRoot: './screenshots',
 	failedComparisonsRoot: './failures',
 
-	// If failedComparisonsRoot is not defined failure images can still 
-	// be found alongside the original and new images
+	/*
+		If failedComparisonsRoot is not defined failure images can still be found alongside the original and new images
+	*/
 
 	addLabelToFailedImage: false, // Don't add label to generated failure image
 
@@ -91,11 +92,31 @@ phantomcss.screenshot( "#CSS .selector", screenshotName);
 // phantomcss.screenshot( "#CSS .selector" );
 // phantomcss.screenshot( "#CSS .selector", delay, hideElements, screenshotName);
 
+/*
+	String is converted into a Regular expression that matches on full image path
+*/
 phantomcss.compareAll('exclude.test'); 
-// String is converted into a Regular expression that matches on full image path
 
 // phantomcss.compareMatched('include.test', 'exclude.test');
+
 // phantomcss.compareMatched( new RegExp('include.test'), new RegExp('exclude.test'));
+
+/*
+	Compare image diffs generated in this test run only
+*/
+// phantomcss.compareSession();
+
+/*
+	Explicitly define what files you want to compare
+*/
+// phantomcss.compareExplicit(['/dialog.diff.png', '/header.diff.png']);
+
+/*
+	Get a list of image diffs generated in this test run
+*/
+// phantomcss.getCreatedDiffFiles();
+
+
 ```
 
 ### Best Practices
@@ -132,7 +153,7 @@ phantomcss.screenshot("#feedback-form");
 
 ##### PhantomCSS should not be used to replace functional tests
 
-If you needed functional tests before, then you still need them.  Automated visual regression testing gives us coverage of CSS and design in a way we didn't have before, but that doesn't mean that conventional test assertions are now invalid.  Feedback time is crucial with test automation, the longer it takes the easier it is to ignore; the easier it is to ignore the sooner trust is lost from the team.  Unfortunately comparing images it not and never will be as fast as simple DOM assertion.
+If you needed functional tests before, then you still need them.  Automated visual regression testing gives us coverage of CSS and design in a way we didn't have before, but that doesn't mean that conventional test assertions are now invalid.  Feedback time is crucial with test automation, the longer it takes the easier it is to ignore; the easier it is to ignore the sooner trust is lost from the team.  Unfortunately comparing images is not, and never will be as fast as simple DOM assertion.
 
 ##### Don't try to test all the visuals
 
