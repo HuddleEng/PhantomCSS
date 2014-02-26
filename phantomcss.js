@@ -1,15 +1,17 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 14 Jan 2014
+Last updated date: 26 Feb 2014
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
 
 var fs = require('fs');
 
-var _root = '.'+fs.separator+'screenshots';
-var _diffRoot = '.'+fs.separator+'failures';
+var _src = '.'+fs.separator+'screenshots';
+var _results = '.'+fs.separator+'screenshots'; // for backwards compatibility results and src are the same - but you can change it!
+var _failures = '.'+fs.separator+'failures';
+
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
@@ -39,8 +41,11 @@ function init(options){
 
 	casper = options.casper || casper;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
-	_root = options.screenshotRoot || _root;
-	_diffRoot = options.failedComparisonsRoot || _diffRoot;
+	
+	_src = options.screenshotRoot || _src;
+	_results = options.comparisonResultRoot || _results;
+	_failures = options.failedComparisonsRoot || _failures;
+	
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
 
 	_onPass = options.onPass || _onPass;
@@ -97,7 +102,8 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 	casper.captureBase64('png'); // force pre-render
 	casper.wait(timeToWait || 250, function(){
 
-		var name = _fileNameGetter(_root, fileName);
+		var srcPath = _fileNameGetter(_src, fileName);
+		var resultPath =  srcPath.replace(_src, _results);
 
 		if(hideSelector || _hideElements){
 			casper.evaluate(function(s1, s2){
@@ -111,13 +117,18 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 			});
 		}
 
-		try{
+		try {
 
-			casper.captureSelector( name , selector );
+			casper.captureSelector( resultPath , selector );
 
-			if(/\.diff\.png/.test(name)){
-				diffsCreated.push(name);
+			if(/\.diff\.png/.test(resultPath)){
+				diffsCreated.push(resultPath);
+			} else {
+				if(srcPath !== resultPath){
+					casper.captureSelector( srcPath , selector ); // new screenshot need to be commitable
+				}
 			}
+
 		}
 		catch(ex){
 			console.log("Screenshot FAILED: " + ex.message);
@@ -237,7 +248,7 @@ function compareAll(exclude, list){
 		_diffsToProcess = list;
 	} else {
 		_realPath = undefined;
-		getDiffs(_root);	
+		getDiffs(_results);
 	}
 
 	_diffsToProcess.forEach(function(file){
@@ -279,9 +290,9 @@ function compareAll(exclude, list){
 							function () {
 								var failFile, safeFileName, increment;
 
-								if(_diffRoot){
+								if(_failures){
 									// flattened structure for failed diffs so that it is easier to preview
-									failFile = _diffRoot + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '');
+									failFile = _failures + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '');
 									safeFileName = failFile;
 									increment = 0;
 
@@ -414,7 +425,7 @@ function _onComplete(tests, noOfFails, noOfErrors){
 
 	if( tests.length === 0){
 		console.log("\nMust be your first time?");
-		console.log("Some screenshots have been generated in the directory " + _root);
+		console.log("Some screenshots have been generated in the directory " + _results);
 		console.log("This is your 'baseline', check the images manually. If they're wrong, delete the images.");
 		console.log("The next time you run these tests, new screenshots will be taken.  These screenshots will be compared to the original.");
 		console.log('If they are different, PhantomCSS will report a failure.');
@@ -425,7 +436,7 @@ function _onComplete(tests, noOfFails, noOfErrors){
 			console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
 		} else {
 			console.log("\nPhantomCSS found " + tests.length + " tests, " + noOfFails + ' of them failed.');
-			console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_diffRoot+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
+			console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_failures+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
 		}
 
 		if(noOfErrors !== 0){
