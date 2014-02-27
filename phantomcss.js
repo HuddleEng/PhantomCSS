@@ -68,12 +68,6 @@ function update(options){
 
 function init(options){
 	update(options);
-
-	if(_src !== _results){ // Prepare result directory, if it's not the same as src
-		fs.removeTree(_results);
-		fs.makeTree(_results);
-		fs.copyTree(_src, _results);
-	}
 }
 
 function turnOffAnimations(){
@@ -137,6 +131,12 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 
 			if(/\.diff\.png/.test(resultPath)){
 				diffsCreated.push(resultPath);
+
+				if(srcPath !== resultPath){
+					fs.makeTree(resultPath);
+					fs.copyTree(srcPath, resultPath);
+				}
+
 			} else {
 				if(srcPath !== resultPath){
 					casper.captureSelector( srcPath , selector ); // new screenshot need to be commitable
