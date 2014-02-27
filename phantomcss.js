@@ -9,7 +9,7 @@ More: http://tldr.huddle.com/blog/css-testing/
 var fs = require('fs');
 
 var _src = '.'+fs.separator+'screenshots';
-var _results = '.'+fs.separator+'screenshots'; // for backwards compatibility results and src are the same - but you can change it!
+var _results; // for backwards compatibility results and src are the same - but you can change it!
 var _failures = '.'+fs.separator+'failures';
 
 var _count = 0;
@@ -47,7 +47,7 @@ function update(options){
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	
 	_src = stripslash(options.screenshotRoot || _src);
-	_results = stripslash(options.comparisonResultRoot || _results);
+	_results = stripslash(options.comparisonResultRoot || _results || _src);
 	_failures = stripslash(options.failedComparisonsRoot || _failures);
 	
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
