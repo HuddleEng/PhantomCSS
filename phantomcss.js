@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 26 Feb 2014
+Last updated date: 27 Feb 2014
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -30,21 +30,25 @@ exports.compareMatched = compareMatched;
 exports.compareExplicit = compareExplicit;
 exports.compareSession = compareSession;
 exports.init = init;
-exports.update = init;
+exports.update = update;
 exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
 exports.getCreatedDiffFiles = getCreatedDiffFiles;
 
-function init(options){
+function update(options){
+
+	function stripslash ( str ){
+		return str.replace(/\/\//g,'/').replace(/\\/g,'\\');
+	}
 
 	options = options || {};
 
 	casper = options.casper || casper;
 	_libraryRoot = options.libraryRoot || _libraryRoot;
 	
-	_src = options.screenshotRoot || _src;
-	_results = options.comparisonResultRoot || _results;
-	_failures = options.failedComparisonsRoot || _failures;
+	_src = stripslash(options.screenshotRoot || _src);
+	_results = stripslash(options.comparisonResultRoot || _results);
+	_failures = stripslash(options.failedComparisonsRoot || _failures);
 	
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
 
@@ -59,6 +63,16 @@ function init(options){
 
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
+	}
+}
+
+function init(options){
+	update(options);
+
+	if(_src !== _results){ // Prepare result directory, if it's not the same as src
+		fs.removeTree(_results);
+		fs.makeTree(_results);
+		fs.copyTree(_src, _results);
 	}
 }
 
