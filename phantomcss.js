@@ -1,7 +1,7 @@
 /*
 Author: James Cryer
 Company: Huddle
-Last updated date: 27 Feb 2014
+Last updated date: 03 Mar 2014
 URL: https://github.com/Huddle/PhantomCSS
 More: http://tldr.huddle.com/blog/css-testing/
 */
@@ -71,7 +71,7 @@ function init(options){
 }
 
 function turnOffAnimations(){
-	console.log('Turning off animations');
+	console.log('[PhantomCSS] Turning off animations');
 	casper.evaluate(function turnOffAnimations(){
 		window.addEventListener('load', function(){
 
@@ -125,30 +125,47 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 			});
 		}
 
-		try {
-
-			casper.captureSelector( resultPath , selector );
-
-			if(/\.diff\.png/.test(resultPath)){
-				diffsCreated.push(resultPath);
-
-				if(srcPath !== resultPath){
-					fs.makeTree(resultPath);
-					fs.copyTree(srcPath, resultPath);
-				}
-
-			} else {
-				if(srcPath !== resultPath){
-					casper.captureSelector( srcPath , selector ); // new screenshot need to be commitable
-				}
-			}
-
-		}
-		catch(ex){
-			console.log("Screenshot FAILED: " + ex.message);
-		}
+		capture(srcPath, resultPath, selector);
 
 	}); // give a bit of time for all the images appear
+}
+
+function capture(srcPath, resultPath, selector){
+	var originalForResult = resultPath.replace('.diff', '');
+	var originalFromSource = srcPath.replace('.diff', '');
+
+	try {
+		casper.captureSelector( resultPath , selector );
+
+		if( isThisImageADiff(resultPath) ){
+			
+			diffsCreated.push(resultPath);
+
+			if(srcPath !== resultPath){
+				copyAndReplaceFile(originalFromSource, originalForResult);
+			}
+
+		} else {
+			if(srcPath !== resultPath){
+				copyAndReplaceFile(srcPath, resultPath);
+			}
+		}
+
+	}
+	catch(ex){
+		console.log("[PhantomCSS] Screenshot capture failed: ", ex.message);
+	}
+}
+
+function isThisImageADiff(path){
+	return /\.diff\.png/.test(path);
+}
+
+function copyAndReplaceFile(src, dest){
+	if(fs.isFile(dest)){
+		fs.remove(dest);
+	}
+	fs.copy(src, dest);
 }
 
 function asyncCompare(one, two, func){
@@ -214,7 +231,7 @@ function getDiffs (path){
 			if(_test_match){
 				if( _test_match.test(_realPath.toLowerCase()) ){
 					if( !(_test_exclude && _test_exclude.test(_realPath.toLowerCase())) ){
-						console.log('Analysing', _realPath);
+						console.log('[PhantomCSS] Analysing', _realPath);
 						_diffsToProcess.push(filePath);
 					}
 				}
@@ -280,7 +297,7 @@ function compareAll(exclude, list){
 		} else {
 
 			if( !fs.isFile(html) ){
-				console.log('Can\'t find Resemble container. Perhaps the library root is mis configured. ('+html+')');
+				console.log('[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. ('+html+')');
 				return;
 			}
 
