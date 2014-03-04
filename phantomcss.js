@@ -135,17 +135,22 @@ function capture(srcPath, resultPath, selector){
 	var originalFromSource = srcPath.replace('.diff', '');
 
 	try {
-		casper.captureSelector( resultPath , selector );
 
 		if( isThisImageADiff(resultPath) ){
+
+			casper.captureSelector( resultPath , selector );
 			
 			diffsCreated.push(resultPath);
 
 			if(srcPath !== resultPath){
+				// also copy the original over to the result directory
 				copyAndReplaceFile(originalFromSource, originalForResult);
 			}
 
 		} else {
+
+			casper.captureSelector( srcPath , selector );
+
 			if(srcPath !== resultPath){
 				copyAndReplaceFile(srcPath, resultPath);
 			}
