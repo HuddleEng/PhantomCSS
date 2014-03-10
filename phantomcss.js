@@ -29,6 +29,8 @@ exports.compareAll = compareAll;
 exports.compareMatched = compareMatched;
 exports.compareExplicit = compareExplicit;
 exports.compareSession = compareSession;
+exports.compareFiles = compareFiles;
+exports.waitForTests = waitForTests;
 exports.init = init;
 exports.update = update;
 exports.turnOffAnimations = turnOffAnimations;
@@ -273,10 +275,84 @@ function compareSession(list){
 	compareAll(void 0, getCreatedDiffFiles() );
 }
 
+function compareFiles(baseFile, file) {
+	var html = _libraryRoot+fs.separator+"ResembleJs"+fs.separator+"resemblejscontainer.html";
+	var test = {
+		filename: baseFile
+	};
+
+	if(!fs.isFile(baseFile)) {
+		test.error = true;
+	} else {
+
+		if( !fs.isFile(html) ){
+			console.log('[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. ('+html+')');
+			test.error = true;
+			return;
+		}
+
+		casper.thenOpen ( html , function (){
+
+			asyncCompare(baseFile, file, function(isSame, mismatch){
+
+				if(!isSame){
+
+					test.fail = true;
+
+					casper.waitFor(
+						function check() {
+							return casper.evaluate(function(){
+								return window._imagediff_.hasImage;
+							});
+						},
+						function () {
+							var failFile, safeFileName, increment;
+
+							if(_failures){
+								// flattened structure for failed diffs so that it is easier to preview
+								failFile = _failures + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '').replace('.png', '');
+								safeFileName = failFile;
+								increment = 0;
+
+								while ( fs.isFile(safeFileName+'.fail.png') ){
+									increment++;
+									safeFileName = failFile+'.'+increment;
+								}
+
+								failFile = safeFileName + '.fail.png';
+
+								casper.captureSelector(failFile, 'img');
+								console.log('Failure! Saved to', failFile);
+							}
+
+							casper.evaluate(function(){
+								window._imagediff_.hasImage = false;
+							});
+
+							if(mismatch){
+								test.mismatch = mismatch;
+								_onFail(test); // casper.test.fail throws and error, this function call is aborted
+								return;  // Just to make it clear what is happening
+							} else {
+								_onTimeout(test);
+							}
+
+						}, function(){},
+						10000
+					);
+				} else {
+                    test.success = true;
+					_onPass(test);
+				}
+
+			});
+		});
+	}
+    return test;
+}
+
 function compareAll(exclude, list){
 	var tests = [];
-	var fails = 0;
-	var errors = 0;
 
 	_test_exclude = typeof exclude === 'string' ? new RegExp(exclude) : exclude;
 	
@@ -288,90 +364,31 @@ function compareAll(exclude, list){
 	}
 
 	_diffsToProcess.forEach(function(file){
-
 		var baseFile = file.replace('.diff', '');
-		var html = _libraryRoot+fs.separator+"ResembleJs"+fs.separator+"resemblejscontainer.html";
-		var test = {
-			filename: baseFile
-		};
-
-		if(!fs.isFile(baseFile)) {
-			test.error = true;
-			errors++;
-			tests.push(test);
-		} else {
-
-			if( !fs.isFile(html) ){
-				console.log('[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. ('+html+')');
-				return;
-			}
-
-			casper.thenOpen ( html , function (){
-
-				asyncCompare(baseFile, file, function(isSame, mismatch){
-
-					tests.push(test);
-
-					if(!isSame){
-
-						test.fail = true;
-						fails++;
-
-						casper.waitFor(
-							function check() {
-								return casper.evaluate(function(){
-									return window._imagediff_.hasImage;
-								});
-							},
-							function () {
-								var failFile, safeFileName, increment;
-
-								if(_failures){
-									// flattened structure for failed diffs so that it is easier to preview
-									failFile = _failures + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '');
-									safeFileName = failFile;
-									increment = 0;
-
-									while ( fs.isFile(safeFileName+'.fail.png') ){
-										increment++;
-										safeFileName = failFile+'.'+increment;
-									}
-
-									failFile = safeFileName + '.fail.png';
-
-									casper.captureSelector(failFile, 'img');
-								}
-
-								casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
-
-								casper.evaluate(function(){
-									window._imagediff_.hasImage = false;
-								});
-
-								if(mismatch){
-									test.mismatch = mismatch;
-									_onFail(test); // casper.test.fail throws and error, this function call is aborted
-									return;  // Just to make it clear what is happening
-								} else {
-									_onTimeout(test);
-								}
-
-							}, function(){},
-							10000
-						);
-					} else {
-						_onPass(test);
-					}
-
-				});
-			});
-		}
+		tests.push(compareFiles(baseFile, file));
 	});
+	waitForTests(tests);
+}
 
+function waitForTests(tests){
 	casper.then(function(){
 		casper.waitFor(function(){
-			return _diffsToProcess.length === tests.length;
+			return tests.length === tests.reduce(function(count, test){
+				if (test.success || test.fail || test.error) {
+					return count + 1;
+				} else {
+					return count;
+				}
+			}, 0);
 		}, function(){
+			var fails = 0, errors = 0;
+			tests.forEach(function(test){
+				if (test.fail){
+					fails++;
+				} else if (test.error){
+					errors++;
+				}
+			});
 			_onComplete(tests, fails, errors);
 		}, function(){
 
