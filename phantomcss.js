@@ -325,6 +325,9 @@ function compareFiles(baseFile, file) {
 								console.log('Failure! Saved to', failFile);
 							}
 
+							// Always create non-flattened failure images
+							casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
+
 							casper.evaluate(function(){
 								window._imagediff_.hasImage = false;
 							});
