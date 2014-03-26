@@ -121,6 +121,8 @@ phantomcss.turnOffAnimations();
 
 ### Don't like pink?
 
+![A failed visual regression test, yellow areas show where the icon has enlarged and pushed other elements down.](https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/differentcolour.png "Failed visual regression test")
+
 ```javascript
 phantomcss.init({
 	/*
@@ -152,8 +154,6 @@ phantomcss.init({
 	}
 });
 ```
-
-![A failed visual regression test, yellow areas show where the icon has enlarged and pushed other elements down.](https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/differentcolour.png "Failed visual regression test")
 
 ### There are different ways to take a screenshot
 
