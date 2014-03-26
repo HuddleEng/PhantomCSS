@@ -80,7 +80,7 @@ function turnOffAnimations(){
 
 			var css = document.createElement("style");
 			css.type = "text/css";
-			css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; }";
+			css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; -webkit-animation: none !important; animation: none !important; }";
 			document.body.appendChild(css);
 
 			if(jQuery){
