@@ -15,7 +15,16 @@ phantomcss.init(/*{
 	onTimeout: function timeoutCallback(){},
 	onComplete: function completeCallback(){},
 	hideElements: '#thing.selector',
-	addLabelToFailedImage: true
+	addLabelToFailedImage: true,
+	outputSettings: {
+		errorColor: {
+			red: 255,
+			green: 255,
+			blue: 0
+		},
+		errorType: 'movement',
+		transparency: 0.3
+	}
 }*/);
 
 

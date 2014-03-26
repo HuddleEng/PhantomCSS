@@ -1,9 +1,7 @@
 /*
-Author: James Cryer
-Company: Huddle
-Last updated date: 03 Mar 2014
-URL: https://github.com/Huddle/PhantomCSS
-More: http://tldr.huddle.com/blog/css-testing/
+James Cryer / Huddle / 2014
+https://github.com/Huddle/PhantomCSS
+http://tldr.huddle.com/blog/css-testing/
 */
 
 var fs = require('fs');
@@ -22,6 +20,7 @@ var _addLabelToFailedImage = true;
 var _test_match;
 var _test_exclude;
 var _mismatchTolerance = 0.05;
+var _resembleOutputSettings;
 var diffsCreated = [];
 
 exports.screenshot = screenshot;
@@ -62,6 +61,8 @@ function update(options){
 	_hideElements = options.hideElements;
 
 	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
+
+	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
@@ -404,7 +405,7 @@ function initClient(){
 
 	casper.page.injectJs(_libraryRoot+fs.separator+'ResembleJs'+fs.separator+'resemble.js');
 
-	casper.evaluate(function(mismatchTolerance){
+	casper.evaluate(function(mismatchTolerance, resembleOutputSettings){
 		
 		var result;
 
@@ -417,6 +418,10 @@ function initClient(){
 			'<input type="file" id="image-diff-two" name="two"/>'+
 		'</form><div id="image-diff"></div>';
 		document.body.appendChild(div);
+
+		if(resembleOutputSettings){
+			resemble.outputSettings(resembleOutputSettings);
+		}
 
 		window._imagediff_ = {
 			hasResult: false,
@@ -460,9 +465,10 @@ function initClient(){
 					
 				});
 		}
-	}, {
-		mismatchTolerance: _mismatchTolerance
-	});
+	}, 
+		_mismatchTolerance,
+		_resembleOutputSettings
+	);
 }
 
 function _onPass(test){
