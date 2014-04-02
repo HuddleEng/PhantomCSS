@@ -21,6 +21,7 @@ var _test_match;
 var _test_exclude;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings;
+var _verbose; //-- Will display how many tests are created and say how to break them.
 var diffsCreated = [];
 
 exports.screenshot = screenshot;
@@ -63,6 +64,9 @@ function update(options){
 	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
+
+    //-- Set verbose to false if it is not defined.
+    _verbose = "undefined" === typeof options.verbose || null === options.verbose ? false : options.verbose;
 
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
@@ -494,8 +498,10 @@ function _onComplete(tests, noOfFails, noOfErrors){
 	} else {
 				
 		if(noOfFails === 0){
-			console.log("\nPhantomCSS found " + tests.length + " tests, None of them failed. Which is good right?");
-			console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
+			if(true === _verbose) {
+				console.log("\nPhantomCSS found " + tests.length + " tests, None of them failed. Which is good right?");
+				console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
+			}
 		} else {
 			console.log("\nPhantomCSS found " + tests.length + " tests, " + noOfFails + ' of them failed.');
 			console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_failures+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
