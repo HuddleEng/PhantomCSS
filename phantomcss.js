@@ -103,8 +103,8 @@ function _fileNameGetter(root, fileName){
 	}
 }
 
-function screenshot(selector, timeToWait, hideSelector, fileName){
 	
+function screenshot(target, timeToWait, hideSelector, fileName){
 	if(isNaN(Number(timeToWait)) && typeof timeToWait === 'string'){
 		fileName = timeToWait;
 		timeToWait = void 0;
@@ -128,21 +128,23 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 			});
 		}
 
-		capture(srcPath, resultPath, selector);
+		capture(srcPath, resultPath, target);
 
 	}); // give a bit of time for all the images appear
 }
 
-function capture(srcPath, resultPath, selector){
+function capture(srcPath, resultPath, target){
 	var originalForResult = resultPath.replace('.diff', '');
 	var originalFromSource = srcPath.replace('.diff', '');
 
 	try {
 
 		if( isThisImageADiff(resultPath) ){
-
-			casper.captureSelector( resultPath , selector );
-			
+			if (isClipRect(target)) {
+				casper.capture(resultPath, target);
+			} else {
+				casper.captureSelector(resultPath, target);
+			}
 			diffsCreated.push(resultPath);
 
 			if(srcPath !== resultPath){
@@ -152,7 +154,11 @@ function capture(srcPath, resultPath, selector){
 
 		} else {
 
-			casper.captureSelector( srcPath , selector );
+			if (isClipRect(target)) {
+				casper.capture(srcPath, target);
+			} else {
+				casper.captureSelector(srcPath, target);
+			}
 
 			if(srcPath !== resultPath){
 				copyAndReplaceFile(srcPath, resultPath);
@@ -163,6 +169,16 @@ function capture(srcPath, resultPath, selector){
 	catch(ex){
 		console.log("[PhantomCSS] Screenshot capture failed: ", ex.message);
 	}
+}
+
+function isClipRect(value) {
+	return (
+		typeof value === 'object' &&
+		typeof value.top === 'number' &&
+		typeof value.left === 'number' &&
+		typeof value.width === 'number' &&
+		typeof value.height === 'number'
+	);
 }
 
 function isThisImageADiff(path){
