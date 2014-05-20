@@ -120,8 +120,8 @@ function screenshot(target, timeToWait, hideSelector, fileName){
 			casper.evaluate(function(s1, s2){
 
 				if(jQuery){
-					if(s1){ $(s1).css('visibility', 'hidden'); }
-					if(s2){ $(s2).css('visibility', 'hidden'); }
+					if(s1){ jQuery(s1).css('visibility', 'hidden'); }
+					if(s2){ jQuery(s2).css('visibility', 'hidden'); }
 					return;
 				}
 
