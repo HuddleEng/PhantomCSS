@@ -166,6 +166,13 @@ phantomcss.screenshot( "#CSS .selector", screenshotName);
 
 // phantomcss.screenshot( "#CSS .selector" );
 // phantomcss.screenshot( "#CSS .selector", delay, hideElements, screenshotName);
+
+// phantomcss.screenshot({
+//   top: 100,
+//   left: 100,
+//   width: 500,
+//   height: 400
+// }, screenshotName);
 ```
 
 ### Compare the images when and how you want
