@@ -118,9 +118,16 @@ function screenshot(selector, timeToWait, hideSelector, fileName){
 
 		if(hideSelector || _hideElements){
 			casper.evaluate(function(s1, s2){
+
+				if(jQuery){
+					if(s1){ $(s1).css('visibility', 'hidden'); }
+					if(s2){ $(s2).css('visibility', 'hidden'); }
+					return;
+				}
+
 				// Ensure at least an empty string
-				s1 = s1 ? s1 : '';
-				s2 = s2 ? s2 : '';
+				s1 = s1 || '';
+				s2 = s2 || '';
 
 				// Create a combined selector, removing leading/trailing commas
 				var selector = (s1 + ',' + s2).replace(/(^,|,$)/g, '');
