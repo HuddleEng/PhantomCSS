@@ -76,17 +76,14 @@ function init(options){
 function turnOffAnimations(){
 	console.log('[PhantomCSS] Turning off animations');
 	casper.evaluate(function turnOffAnimations(){
-		window.addEventListener('load', function(){
+		var css = document.createElement("style");
+		css.type = "text/css";
+		css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; -webkit-animation: none !important; animation: none !important; }";
+		document.body.appendChild(css);
 
-			var css = document.createElement("style");
-			css.type = "text/css";
-			css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; }";
-			document.body.appendChild(css);
-
-			if(jQuery){
-				jQuery.fx.off = true;
-			}
-		},false);
+		if(jQuery){
+			jQuery.fx.off = true;
+		}
 	});
 }
 
