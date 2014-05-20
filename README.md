@@ -29,8 +29,7 @@ casper.
 
 From the command line/terminal run
 
-* On Windows `casperjs demo/testsuite.js`
-* On Mac OSX `casperjs test demo/testsuite.js`
+* `casperjs test demo/testsuite.js`
 
 ### Download
 
@@ -41,9 +40,9 @@ From the command line/terminal run
 ### Getting started, try the demo
 
 * Mac OSX users should first [install CasperJS 1.1-beta](http://docs.casperjs.org/en/latest/installation.html), easiest with Homebrew.  For convenience I've included CasperJS.bat for Windows users.
-* Download or clone this repo and run `casperjs demo/testsuite.js` (windows) or `casperjs test demo/testsuite.js` (OSX) in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
+* Download or clone this repo and run `casperjs test demo/testsuite.js` in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
 * Find the screenshot folder and have a look at the (baseline) images
-* Run the tests again with `casperjs demo/testsuite.js` (windows) or `casperjs test demo/testsuite.js` (OSX). New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
+* Run the tests again with `casperjs test demo/testsuite.js`. New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
 * To test failure, add/change some CSS in the file demo/coffeemachine.html e.g. make `.mug` bright green
 * Run the tests again, you should see some reported failures
 * In the failures folder some images should have been created. The images should show bright pink where the screenshot has visually changed
