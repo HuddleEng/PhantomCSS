@@ -76,13 +76,22 @@ function init(options){
 function turnOffAnimations(){
 	console.log('[PhantomCSS] Turning off animations');
 	casper.evaluate(function turnOffAnimations(){
+		
+		function disableAnimations(){
+			if(jQuery){
+				jQuery.fx.off = true;
+			}
+		}
+
 		var css = document.createElement("style");
 		css.type = "text/css";
 		css.innerHTML = "* { -webkit-transition: none !important; transition: none !important; -webkit-animation: none !important; animation: none !important; }";
 		document.body.appendChild(css);
 
-		if(jQuery){
-			jQuery.fx.off = true;
+		if (document.readyState !== "loading") {
+			disableAnimations();
+		} else {
+			window.addEventListener('load', disableAnimations, false);
 		}
 	});
 }
