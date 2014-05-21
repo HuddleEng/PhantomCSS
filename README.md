@@ -271,7 +271,7 @@ If your using a version control system like Git to store the baseline screenshot
 
 ### ...You might also be interested in
 
-**[grunt-testflow](https://github.com/Huddle/grunt-testflow)**, A grunt plugin that wraps PhantomCSS and also provides an experimental way of describing and visualising user flows through tests with CasperJS. As well as providing a terse readable structure for UI testing, it also produces intriguing graph visualisations that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better. "Work in progress".
+**[PhantomFlow](https://github.com/Huddle/PhantomFlow)** and **[grunt-phantomflow](https://github.com/Huddle/grunt-testflow)** wrap PhantomCSS and provides an experimental way of describing and visualising user flows through tests with CasperJS. As well as providing a terse readable structure for UI testing, it also produces intriguing graph visualisations that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better.
 
 Also, take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for stubbing and mocking XHR requests. Isolated UI testing IS THE FUTURE!
 
