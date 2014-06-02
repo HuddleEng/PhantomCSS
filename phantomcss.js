@@ -56,6 +56,7 @@ function update(options){
 	_onPass = options.onPass || _onPass;
 	_onFail = options.onFail || _onFail;
 	_onTimeout = options.onTimeout || _onTimeout;
+	_onNewImage = options.onNewImage || _onNewImage;
 	_onComplete = options.onComplete || options.report || _onComplete;
 
 	_hideElements = options.hideElements;
@@ -184,6 +185,10 @@ function capture(srcPath, resultPath, target){
 			if(srcPath !== resultPath){
 				copyAndReplaceFile(srcPath, resultPath);
 			}
+
+			_onNewImage({
+				filename: resultPath
+			});
 		}
 
 	}
@@ -523,6 +528,10 @@ function _onFail(test){
 function _onTimeout(test){
 	console.log('\n');
 	casper.test.info('Could not complete image comparison for ' + test.filename);
+}
+function _onNewImage(test){
+	console.log('\n');
+	casper.test.info('New screenshot at ', + test.filename);
 }
 function _onComplete(tests, noOfFails, noOfErrors){
 
