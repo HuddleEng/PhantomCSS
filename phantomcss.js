@@ -361,13 +361,13 @@ function compareFiles(baseFile, file) {
 
 								casper.captureSelector(failFile, 'img');
 								console.log('Failure! Saved to', failFile);
-							}
-
-							// Always create non-flattened failure images
-							if (file.indexOf('.diff.png') !== -1) {
-								casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
 							} else {
-								casper.captureSelector(file.replace('.png', '.fail.png'), 'img');
+								// Always create non-flattened failure images
+								if (file.indexOf('.diff.png') !== -1) {
+									casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
+								} else {
+									casper.captureSelector(file.replace('.png', '.fail.png'), 'img');
+								}
 							}
 
 							casper.evaluate(function(){
