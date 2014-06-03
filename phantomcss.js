@@ -530,7 +530,7 @@ function _onTimeout(test){
 }
 function _onNewImage(test){
 	console.log('\n');
-	casper.test.info('New screenshot at ', + test.filename);
+	casper.test.info('New screenshot at '+ test.filename);
 }
 function _onComplete(tests, noOfFails, noOfErrors){
 
