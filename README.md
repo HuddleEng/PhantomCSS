@@ -75,6 +75,8 @@ phantomcss.init({
 	*/
 	onFail: function(test){ console.log(test.filename, test.mismatch); },
 	onPass: function(){ console.log(test.filename); },
+	// called when creating new baseline images
+	onNewImage: function(){ console.log(test.filename); },
 	onTimeout: function(){ console.log(test.filename); },
 	onComplete: function(allTests, noOfFails, noOfErrors){
 		allTests.forEach(function(test){
