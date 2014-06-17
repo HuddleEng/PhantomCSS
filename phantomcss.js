@@ -49,7 +49,7 @@ function update(options){
 	
 	_src = stripslash(options.screenshotRoot || _src);
 	_results = stripslash(options.comparisonResultRoot || _results || _src);
-	_failures = stripslash(options.failedComparisonsRoot || _failures);
+	_failures = options.failedComparisonsRoot === false ? false : stripslash( options.failedComparisonsRoot || _failures);
 	
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
 
@@ -353,7 +353,7 @@ function compareFiles(baseFile, file) {
 
 							if(_failures){
 								// flattened structure for failed diffs so that it is easier to preview
-								failFile = _failures + fs.separator + file.split(fs.separator).pop().replace('.diff.png', '').replace('.png', '');
+								failFile = _failures + fs.separator + file.split(/\/|\\/g).pop().replace('.diff.png', '').replace('.png', '');
 								safeFileName = failFile;
 								increment = 0;
 
@@ -366,14 +366,14 @@ function compareFiles(baseFile, file) {
 
 								casper.captureSelector(failFile, 'img');
 								console.log('Failure! Saved to', failFile);
-							} else {
-								if (file.indexOf('.diff.png') !== -1) {
-									casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
-								} else {
-									casper.captureSelector(file.replace('.png', '.fail.png'), 'img');
-								}
 							}
 
+							if (file.indexOf('.diff.png') !== -1) {
+								casper.captureSelector(file.replace('.diff.png', '.fail.png'), 'img');
+							} else {
+								casper.captureSelector(file.replace('.png', '.fail.png'), 'img');
+							}
+						
 							casper.evaluate(function(){
 								window._imagediff_.hasImage = false;
 							});
@@ -547,7 +547,9 @@ function _onComplete(tests, noOfFails, noOfErrors){
 			console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
 		} else {
 			console.log("\nPhantomCSS found " + tests.length + " tests, " + noOfFails + ' of them failed.');
-			console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_failures+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
+			if(_failures){
+				console.log('\nPhantomCSS has created some images that try to show the difference (in the directory '+_failures+'). Fuchsia colored pixels indicate a difference betwen the new and old screenshots.');
+			}
 		}
 
 		if(noOfErrors !== 0){
