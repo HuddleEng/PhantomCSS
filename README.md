@@ -48,17 +48,24 @@ From the command line/terminal run
 * In the failures folder some images should have been created. The images should show bright pink where the screenshot has visually changed
 * If you want to manually compare the images, go to the screenshot folder to see the original/baseline and latest screenshots
 
-### Example setup
+### Options and setup
 
 ```javascript
 phantomcss.init({
+	
 	libraryRoot: './modules/PhantomCSS',
+	
 	screenshotRoot: './screenshots',
 
 	/*
-		If failedComparisonsRoot is not defined failure images can still be found alongside the original and new images
+		By default, failure images are put in the './failures' folder. If failedComparisonsRoot is set to false a seperate folder will not be created but failure images can still be found alongside the original and new images.
 	*/
 	failedComparisonsRoot: './failures',
+
+	/*
+		You might want to keep master/baseline images in a completely different folder to the diffs/failures.  Useful when working with version control systems. By default this resolves to the screenshotRoot folder.
+	*/
+	comparisonResultRoot: './results'
 
 	/*
 		Don't add label to generated failure image
@@ -74,10 +81,16 @@ phantomcss.init({
 		Callbacks for your specific integration
 	*/
 	onFail: function(test){ console.log(test.filename, test.mismatch); },
+	
 	onPass: function(){ console.log(test.filename); },
-	// called when creating new baseline images
+	
+	/* 
+		Called when creating new baseline images
+	*/
 	onNewImage: function(){ console.log(test.filename); },
+	
 	onTimeout: function(){ console.log(test.filename); },
+	
 	onComplete: function(allTests, noOfFails, noOfErrors){
 		allTests.forEach(function(test){
 			if(test.fail){
@@ -114,6 +127,7 @@ phantomcss.init({
 		transparency: 0.3
 	}
 });
+
 /*
 	Turn off CSS transitions and jQuery animations
 */
