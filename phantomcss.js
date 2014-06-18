@@ -39,7 +39,7 @@ exports.getCreatedDiffFiles = getCreatedDiffFiles;
 function update(options){
 
 	function stripslash ( str ){
-		return str.replace(/\/\//g,'/').replace(/\\/g,'\\');
+		return (str||'').replace(/\/\//g,'/').replace(/\\/g,'\\');
 	}
 
 	options = options || {};
