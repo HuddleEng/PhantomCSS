@@ -1,3 +1,5 @@
+**Huddle is Hiring!** We're always looking for talented Developers and Test Engineers. Visit http://www.huddle.com/careers for open vacancies now, or register your interest for the future.
+
 PhantomCSS
 ==========
 
@@ -290,6 +292,14 @@ If your using a version control system like Git to store the baseline screenshot
 **[PhantomFlow](https://github.com/Huddle/PhantomFlow)** and **[grunt-phantomflow](https://github.com/Huddle/grunt-testflow)** wrap PhantomCSS and provides an experimental way of describing and visualising user flows through tests with CasperJS. As well as providing a terse readable structure for UI testing, it also produces intriguing graph visualisations that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better.
 
 Also, take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for stubbing and mocking XHR requests. Isolated UI testing IS THE FUTURE!
+
+### Huddle Careers
+
+Huddle strongly believe in innovation and give you 20% of work time to spend on innovative projects of your choosing.
+
+If you like what you see and would like to work on this kind of stuff for a job then get in touch.
+
+Visit http://www.huddle.com/careers for open vacancies now, or register your interest for the future.
 
 --------------------------------------
 
