@@ -21,6 +21,7 @@ var _test_match;
 var _test_exclude;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings;
+var _removeComparisonImages = false;
 var diffsCreated = [];
 
 exports.screenshot = screenshot;
@@ -62,6 +63,7 @@ function update(options){
 	_hideElements = options.hideElements;
 
 	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
+   _removeComparisonImages = options.removeComparisonImages || _removeComparisonImages;
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
@@ -515,7 +517,13 @@ function initClient(){
 		_resembleOutputSettings
 	);
 }
-
+function removeImagesAtPath(screenshotsPath) {
+   fs.list(screenshotsPath).forEach(function removeFiles(imagePath) {
+      if (imagePath.match(/\.png$/)) {
+         fs.remove(screenshotsPath + '/' + imagePath);
+      }
+   });
+}
 function _onPass(test){
 	console.log('\n');
 	casper.test.pass('No changes found for screenshot ' + test.filename);
@@ -557,6 +565,9 @@ function _onComplete(tests, noOfFails, noOfErrors){
 		}
 
 		exitStatus = noOfErrors+noOfFails;
+      if (_removeComparisonImages) {
+         removeImagesAtPath(_results);
+      }
 	}
 }
 
