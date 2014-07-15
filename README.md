@@ -65,6 +65,11 @@ phantomcss.init({
 	failedComparisonsRoot: './failures',
 
 	/*
+		Remove results directory tree after run.  Use in conjunction with failedComparisonsRoot to see failed comparisons
+	*/
+	cleanupComparisonImages: true,
+
+	/*
 		You might want to keep master/baseline images in a completely different folder to the diffs/failures.  Useful when working with version control systems. By default this resolves to the screenshotRoot folder.
 	*/
 	comparisonResultRoot: './results'
