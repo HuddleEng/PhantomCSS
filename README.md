@@ -241,7 +241,7 @@ phantomcss.screenshot("#feedback-form", "Responsive Feedback Form");
 
 ```
 
-Perhaps a better way is to use the ‘fileNameGetter’ callback property on the ‘init’ method. This does involve having a bit more structure around your tests.  See: https://github.com/Huddle/PhantomFlow/blob/master/demo/runTests.js#L72
+Perhaps a better way is to use the ‘fileNameGetter’ callback property on the ‘init’ method. This does involve having a bit more structure around your tests.  See: https://github.com/Huddle/PhantomFlow/blob/master/lib/phantomCSSAdaptor.js#L41
 
 ##### CSS3 selectors for testing
 
