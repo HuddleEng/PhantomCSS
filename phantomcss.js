@@ -21,6 +21,7 @@ var _test_match;
 var _test_exclude;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings;
+var _cleanupComparisonImages = false;
 var diffsCreated = [];
 
 exports.screenshot = screenshot;
@@ -65,8 +66,14 @@ function update(options){
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
+        _cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
+
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
+	}
+
+	if (_cleanupComparisonImages) {
+	   _results += fs.separator + generateRandomString();
 	}
 }
 
@@ -557,10 +564,17 @@ function _onComplete(tests, noOfFails, noOfErrors){
 			console.log("There were " + noOfErrors + "errors.  Is it possible that a baseline image was deleted but not the diff?");
 		}
 
+        if (_cleanupComparisonImages) {
+           fs.removeTree(_results);
+        }
+
 		exitStatus = noOfErrors+noOfFails;
 	}
 }
 
 function getExitStatus() {
 	return exitStatus;
+}
+function generateRandomString() {
+   return (Math.random() + 1).toString(36).substring(7);
 }
