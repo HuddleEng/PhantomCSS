@@ -3,6 +3,14 @@ Resemble.js
 
 Analyse and compare images with Javascript and HTML5. [Resemble.js Demo](http://huddle.github.com/Resemble.js/)
 
+![Two image diff examples side-by-side, one pink, one yellow.](https://raw.github.com/Huddle/Resemble.js/master/demoassets/readmeimage.jpg "Visual image comparison")
+
+### Get it
+
+`npm install resemblejs`
+
+`bower install resemblejs`
+
 ### Example
 
 Retrieve basic analysis on image.
@@ -44,6 +52,26 @@ You can also change the comparison method after the first analysis.
 // diff.ignoreColors();
 diff.ignoreAntialiasing();
 ```
+
+And change the output display style.
+
+```javascript
+resemble.outputSettings({
+  errorColor: {
+    red: 255,
+    green: 0,
+    blue: 255
+  },
+  errorType: 'movement',
+  transparency: 0.3,
+  largeImageThreshold: 1200
+});
+// resembleControl.repaint();
+```
+
+By default, the comparison algorithm skips pixels when the image width or height is larger than 1200 pixels. This is there to mitigate performance issues.
+
+You can switch this modify this behaviour by setting the `largeImageThreshold` option to a different value. Set it to **0** to switch it off completely.
 
 --------------------------------------
 
