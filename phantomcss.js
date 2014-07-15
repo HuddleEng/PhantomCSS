@@ -363,8 +363,9 @@ function compareFiles(baseFile, file) {
 								}
 
 								failFile = safeFileName + '.fail.png';
-
 								casper.captureSelector(failFile, 'img');
+
+								test.failFile = failFile;
 								console.log('Failure! Saved to', failFile);
 							}
 
