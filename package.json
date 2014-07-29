@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/Huddle/PhantomCSS.git"
   },
+  "main" : "phantomcss.js",
   "keywords": [
     "css",
     "phantomjs",
