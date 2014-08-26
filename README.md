@@ -60,7 +60,7 @@ phantomcss.init({
 	screenshotRoot: './screenshots',
 
 	/*
-		By default, failure images are put in the './failures' folder. If failedComparisonsRoot is set to false a seperate folder will not be created but failure images can still be found alongside the original and new images.
+		By default, failure images are put in the './failures' folder. If failedComparisonsRoot is set to false a separate folder will not be created but failure images can still be found alongside the original and new images.
 	*/
 	failedComparisonsRoot: './failures',
 
