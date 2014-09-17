@@ -89,7 +89,7 @@ phantomcss.init({
 	*/
 	onFail: function(test){ console.log(test.filename, test.mismatch); },
 	
-	onPass: function(){ console.log(test.filename); },
+	onPass: function(test){ console.log(test.filename); },
 	
 	/* 
 		Called when creating new baseline images
