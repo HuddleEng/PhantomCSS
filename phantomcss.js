@@ -119,47 +119,18 @@ function _fileNameGetter(root, fileName){
 
 	
 function screenshot(target, timeToWait, hideSelector, fileName){
-	if(isNaN(Number(timeToWait)) && typeof timeToWait === 'string'){
+	if(isNaN(Number(timeToWait)) && (typeof timeToWait === 'string' || timeToWait instanceof Array)){
 		fileName = timeToWait;
 		timeToWait = void 0;
 	}
 
-	casper.captureBase64('png'); // force pre-render
-	casper.wait(timeToWait || 250, function(){
-
-		var srcPath = _fileNameGetter(_src, fileName);
-		var resultPath =  srcPath.replace(_src, _results);
-
-		if(hideSelector || _hideElements){
-			casper.evaluate(function(s1, s2){
-
-				if(jQuery){
-					if(s1){ jQuery(s1).css('visibility', 'hidden'); }
-					if(s2){ jQuery(s2).css('visibility', 'hidden'); }
-					return;
-				}
-
-				// Ensure at least an empty string
-				s1 = s1 || '';
-				s2 = s2 || '';
-
-				// Create a combined selector, removing leading/trailing commas
-				var selector = (s1 + ',' + s2).replace(/(^,|,$)/g, '');
-				var elements = document.querySelectorAll(selector);
-				var i        = elements.length;
-
-				while( i-- ){
-					elements[i].style.visibility = 'hidden';
-				}
-			}, {
-				s1: _hideElements,
-				s2: hideSelector
-			});
+	if(target instanceof Array && fileName instanceof Array){
+		for(var i = 0; i < target.length; i++){
+			_goCapture(target[i], timeToWait, hideSelector, fileName[i]);
 		}
-
-		capture(srcPath, resultPath, target);
-
-	}); // give a bit of time for all the images appear
+	} else {
+		_goCapture(target, timeToWait, hideSelector, fileName);
+	}
 }
 
 function capture(srcPath, resultPath, target){
@@ -570,6 +541,46 @@ function _onComplete(tests, noOfFails, noOfErrors){
 
 		exitStatus = noOfErrors+noOfFails;
 	}
+}
+
+function _goCapture(target, timeToWait, hideSelector, fileName){
+
+	casper.captureBase64('png'); // force pre-render
+	casper.wait(timeToWait || 250, function(){
+
+		var srcPath = _fileNameGetter(_src, fileName);
+		var resultPath =  srcPath.replace(_src, _results);
+
+		if(hideSelector || _hideElements){
+			casper.evaluate(function(s1, s2){
+
+				if(jQuery){
+					if(s1){ jQuery(s1).css('visibility', 'hidden'); }
+					if(s2){ jQuery(s2).css('visibility', 'hidden'); }
+					return;
+				}
+
+				// Ensure at least an empty string
+				s1 = s1 || '';
+				s2 = s2 || '';
+
+				// Create a combined selector, removing leading/trailing commas
+				var selector = (s1 + ',' + s2).replace(/(^,|,$)/g, '');
+				var elements = document.querySelectorAll(selector);
+				var i        = elements.length;
+
+				while( i-- ){
+					elements[i].style.visibility = 'hidden';
+				}
+			}, {
+				s1: _hideElements,
+				s2: hideSelector
+			});
+		}
+
+		capture(srcPath, resultPath, target);
+
+	}); // give a bit of time for all the images appear
 }
 
 function getExitStatus() {
