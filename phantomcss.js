@@ -13,7 +13,7 @@ var _failures = '.'+fs.separator+'failures';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _libraryRoot = '.';
+var _libraryRoot = '.'+ fs.separator + 'libs';
 var exitStatus;
 var _hideElements;
 var _addLabelToFailedImage = true;
@@ -49,10 +49,9 @@ function update(options){
 	options = options || {};
 
 	casper = options.casper || casper;
-	_libraryRoot = (options.libraryRoot || _libraryRoot) + fs.separator + 'libs';
+	_libraryRoot = options.libraryRoot || _libraryRoot;
 	
 	_resemblePath = _libraryRoot+fs.separator+'resemblejs'+fs.separator+'resemble.js';
-	_resembleContainerPath = _libraryRoot+fs.separator+'..'+fs.separator+'resemblejscontainer.html';
 
 	_src = stripslash(options.screenshotRoot || _src);
 	_results = stripslash(options.comparisonResultRoot || _results || _src);
@@ -333,7 +332,6 @@ function compareSession(list){
 }
 
 function compareFiles(baseFile, file) {
-	var html = _resembleContainerPath;
 	var test = {
 		filename: baseFile
 	};
@@ -342,13 +340,7 @@ function compareFiles(baseFile, file) {
 		test.error = true;
 	} else {
 
-		if( !fs.isFile(html) ){
-			console.log('[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. ('+html+')');
-			test.error = true;
-			return;
-		}
-
-		casper.thenOpen ( html , function (){
+		casper.thenOpen ( '<html><head></head><body></body></html>' , function (){
 
 			asyncCompare(baseFile, file, function(isSame, mismatch){
 
