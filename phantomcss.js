@@ -25,6 +25,7 @@ var _cleanupComparisonImages = false;
 var diffsCreated = [];
 
 var _resemblePath;
+var _resembleContainerPath;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
@@ -48,9 +49,10 @@ function update(options){
 	options = options || {};
 
 	casper = options.casper || casper;
-	_libraryRoot = options.libraryRoot || _libraryRoot;
+	_libraryRoot = (options.libraryRoot || _libraryRoot) + fs.separator + 'libs';
 	
-	_resemblePath = _libraryRoot+fs.separator+'ResembleJs'+fs.separator+'resemble.js';
+	_resemblePath = _libraryRoot+fs.separator+'resemblejs'+fs.separator+'resemble.js';
+	_resembleContainerPath = _libraryRoot+fs.separator+'..'+fs.separator+'resemblejscontainer.html';
 
 	_src = stripslash(options.screenshotRoot || _src);
 	_results = stripslash(options.comparisonResultRoot || _results || _src);
@@ -70,7 +72,7 @@ function update(options){
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
-        _cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
+    _cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
 
 	if(options.addLabelToFailedImage !== undefined){
 		_addLabelToFailedImage = options.addLabelToFailedImage;
@@ -331,7 +333,7 @@ function compareSession(list){
 }
 
 function compareFiles(baseFile, file) {
-	var html = '.'+fs.separator+"resemblejscontainer.html";
+	var html = _resembleContainerPath;
 	var test = {
 		filename: baseFile
 	};
