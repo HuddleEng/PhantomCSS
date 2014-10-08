@@ -13,7 +13,6 @@ var _failures = '.'+fs.separator+'failures';
 var _count = 0;
 var _realPath;
 var _diffsToProcess = [];
-var _libraryRoot = '.'+ fs.separator + 'libs';
 var exitStatus;
 var _hideElements;
 var _addLabelToFailedImage = true;
@@ -49,9 +48,10 @@ function update(options){
 	options = options || {};
 
 	casper = options.casper || casper;
-	_libraryRoot = options.libraryRoot || _libraryRoot;
-	
-	_resemblePath = _libraryRoot+fs.separator+'resemblejs'+fs.separator+'resemble.js';
+
+	_resemblePath = getResemblePath(options.libraryRoot || '.');
+
+	_resembleContainerPath = (options.libraryRoot || '.') + fs.separator + 'resemblejscontainer.html'
 
 	_src = stripslash(options.screenshotRoot || _src);
 	_results = stripslash(options.comparisonResultRoot || _results || _src);
@@ -84,6 +84,17 @@ function update(options){
 
 function init(options){
 	update(options);
+}
+
+function getResemblePath(root){
+	var path = [root,'libs','resemblejs','resemble.js'].join(fs.separator);
+	if(!fs.isFile(path)){
+		path = [root,'node_modules','resemblejs','resemble.js'].join(fs.separator);
+		if(!fs.isFile(path)){
+			console.log("[PhantomCSS] Screenshot capture failed: ", ex.message);
+		}
+	}
+	return path;
 }
 
 function turnOffAnimations(){
@@ -340,7 +351,13 @@ function compareFiles(baseFile, file) {
 		test.error = true;
 	} else {
 
-		casper.thenOpen ( '<html><head></head><body></body></html>' , function (){
+		if( !fs.isFile(_resembleContainerPath) ){
+			console.log('[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. ('+_resembleContainerPath+')');
+			test.error = true;
+			return;
+		}
+
+		casper.thenOpen ( _resembleContainerPath , function (){
 
 			asyncCompare(baseFile, file, function(isSame, mismatch){
 

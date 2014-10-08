@@ -35,7 +35,7 @@ From the command line/terminal run
 
 ### Download
 
-* `npm install phantomcss`
+* `npm install phantomcss` (PhantomCSS is not itself a Node.js module)
 * `bower install phantomcss`
 * `git clone git://github.com/Huddle/PhantomCSS.git`
 
