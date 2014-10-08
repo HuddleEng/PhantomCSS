@@ -190,7 +190,8 @@ function capture(srcPath, resultPath, target){
 			}
 
 			if(srcPath !== resultPath){
-				copyAndReplaceFile(srcPath, resultPath);
+				// can't use copyAndReplaceFile yet, so just capture again
+				casper.captureSelector(resultPath, target);
 			}
 
 			_onNewImage({

@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/Huddle/PhantomCSS.git"
   },
-  "main" : "phantomcss.js",
+  "main": "phantomcss.js",
   "keywords": [
     "css",
     "phantomjs",
@@ -19,5 +19,10 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Huddle/PhantomCSS/issues"
+  },
+  "dependencies": {
+    "phantomjs": "~1.9.10",
+    "casperjs": "~1.1.0-beta3",
+    "resemblejs": "~1.2.0"
   }
 }
