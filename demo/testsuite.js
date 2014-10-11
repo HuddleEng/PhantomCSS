@@ -64,7 +64,10 @@ casper.then(function(){
 	// wait for modal to fade-out
 	casper.waitForSelector('#myModal[style*="display: none"]',
 		function success(){
-			phantomcss.screenshot(['#coffee-machine-wrapper','#coffee-machine-button'], ['coffee machine close success', 'second coffee machine button success']);
+			phantomcss.screenshot({
+				'Coffee machine close success': {selector: '#coffee-machine-wrapper', ignore: '.selector'},
+				'Coffee machine button success': '#coffee-machine-button'
+			});
 		},
 		function timeout(){
 			casper.test.fail('Should be able to walk away from the coffee machine');
