@@ -119,17 +119,20 @@ function _fileNameGetter(root, fileName){
 
 	
 function screenshot(target, timeToWait, hideSelector, fileName){
-	if(isNaN(Number(timeToWait)) && (typeof timeToWait === 'string' || timeToWait instanceof Array)){
-		fileName = timeToWait;
-		timeToWait = void 0;
-	}
-
-	if(target instanceof Array && fileName instanceof Array){
-		for(var i = 0; i < target.length; i++){
-			_goCapture(target[i], timeToWait, hideSelector, fileName[i]);
+	if(target instanceof Object){
+		for(var name in target){
+			if(target[name] instanceof Object){
+				_goCapture(target[name].selector, name, target[name].ignore);
+			} else {
+				_goCapture(target[name], name);
+			}
 		}
 	} else {
-		_goCapture(target, timeToWait, hideSelector, fileName);
+		if(isNaN(Number(timeToWait)) && (typeof timeToWait === 'string')){
+			fileName = timeToWait;
+			timeToWait = void 0;
+		}
+		_goCapture(target, fileName, hideSelector, timeToWait);
 	}
 }
 
@@ -543,7 +546,7 @@ function _onComplete(tests, noOfFails, noOfErrors){
 	}
 }
 
-function _goCapture(target, timeToWait, hideSelector, fileName){
+function _goCapture(target, fileName, hideSelector, timeToWait){
 
 	casper.captureBase64('png'); // force pre-render
 	casper.wait(timeToWait || 250, function(){
