@@ -52,12 +52,10 @@ From the command line/terminal run
 
 ### Options and setup
 
-If you install via NPM, ensure that the libraryRoot is set to the phantomcss/node_modules directory
-
 ```javascript
 phantomcss.init({
 	
-	// libraryRoot: './node_modules/phantomcss/node_modules/',
+	libraryRoot: './modules/PhantomCSS',
 	
 	screenshotRoot: './screenshots',
 
