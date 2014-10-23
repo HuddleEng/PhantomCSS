@@ -188,6 +188,10 @@ var screenshotName = 'the_dialog'
 
 phantomcss.screenshot( "#CSS .selector", screenshotName);
 
+// phantomcss.screenshot({
+//  	'Screenshot 1 File name': {selector: '.screenshot1', ignore: '.selector'},
+//  	'Screenshot 2 File name': '#screenshot2'
+// });
 // phantomcss.screenshot( "#CSS .selector" );
 // phantomcss.screenshot( "#CSS .selector", delay, hideElements, screenshotName);
 

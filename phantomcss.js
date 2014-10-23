@@ -135,47 +135,27 @@ function _fileNameGetter(root, fileName){
 
 	
 function screenshot(target, timeToWait, hideSelector, fileName){
-	if(isNaN(Number(timeToWait)) && typeof timeToWait === 'string'){
-		fileName = timeToWait;
-		timeToWait = void 0;
-	}
+	var name;
 
-	casper.captureBase64('png'); // force pre-render
-	casper.wait(timeToWait || 250, function(){
-
-		var srcPath = _fileNameGetter(_src, fileName);
-		var resultPath =  srcPath.replace(_src, _results);
-
-		if(hideSelector || _hideElements){
-			casper.evaluate(function(s1, s2){
-
-				if(jQuery){
-					if(s1){ jQuery(s1).css('visibility', 'hidden'); }
-					if(s2){ jQuery(s2).css('visibility', 'hidden'); }
-					return;
-				}
-
-				// Ensure at least an empty string
-				s1 = s1 || '';
-				s2 = s2 || '';
-
-				// Create a combined selector, removing leading/trailing commas
-				var selector = (s1 + ',' + s2).replace(/(^,|,$)/g, '');
-				var elements = document.querySelectorAll(selector);
-				var i        = elements.length;
-
-				while( i-- ){
-					elements[i].style.visibility = 'hidden';
-				}
-			}, {
-				s1: _hideElements,
-				s2: hideSelector
-			});
+	if ( isComponentsConfig(target) ){
+		for(name in target){
+			if( isComponentsConfig(target[name]) ){
+				waitAndHideToCapture(target[name].selector, name, target[name].ignore, target[name].wait);
+			} else {
+				waitAndHideToCapture(target[name], name);
+			}
 		}
+	} else {
+		if(isNaN(Number(timeToWait)) && (typeof timeToWait === 'string')){
+			fileName = timeToWait;
+			timeToWait = void 0;
+		}
+		waitAndHideToCapture(target, fileName, hideSelector, timeToWait);
+	}
+}
 
-		capture(srcPath, resultPath, target);
-
-	}); // give a bit of time for all the images appear
+function isComponentsConfig(obj){
+	return (obj instanceof Object) && (isClipRect(obj) === false);
 }
 
 function capture(srcPath, resultPath, target){
@@ -568,7 +548,7 @@ function _onComplete(tests, noOfFails, noOfErrors){
 				
 		if(noOfFails === 0){
 			console.log("\nPhantomCSS found " + tests.length + " tests, None of them failed. Which is good right?");
-			console.log("\nIf you want to make them fail, go change some CSS - weirdo.");
+			console.log("\nIf you want to make them fail, change some CSS.");
 		} else {
 			console.log("\nPhantomCSS found " + tests.length + " tests, " + noOfFails + ' of them failed.');
 			if(_failures){
@@ -585,6 +565,48 @@ function _onComplete(tests, noOfFails, noOfErrors){
         }
 
 		exitStatus = noOfErrors+noOfFails;
+	}
+}
+
+function waitAndHideToCapture(target, fileName, hideSelector, timeToWait){
+
+	casper.wait(timeToWait || 250, function(){
+
+		var srcPath = _fileNameGetter(_src, fileName);
+		var resultPath =  srcPath.replace(_src, _results);
+
+		if(hideSelector || _hideElements){
+			casper.evaluate( setVisibilityToHidden, { s1: _hideElements, s2: hideSelector });
+		}
+
+		capture(srcPath, resultPath, target);
+
+	}); // give a bit of time for all the images appear
+}
+
+function setVisibilityToHidden(s1, s2){
+	// executes in browser scope
+	var selector;
+	var elements;
+	var i;
+
+	if(jQuery){
+		if(s1){ jQuery(s1).css('visibility', 'hidden'); }
+		if(s2){ jQuery(s2).css('visibility', 'hidden'); }
+		return;
+	}
+
+	// Ensure at least an empty string
+	s1 = s1 || '';
+	s2 = s2 || '';
+
+	// Create a combined selector, removing leading/trailing commas
+	selector = (s1 + ',' + s2).replace(/(^,|,$)/g, '');
+	elements = document.querySelectorAll(selector);
+	i        = elements.length;
+
+	while( i-- ){
+		elements[i].style.visibility = 'hidden';
 	}
 }
 
