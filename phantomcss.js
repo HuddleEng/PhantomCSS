@@ -91,7 +91,7 @@ function getResemblePath(root){
 	if(!fs.isFile(path)){
 		path = [root,'node_modules','resemblejs','resemble.js'].join(fs.separator);
 		if(!fs.isFile(path)){
-			console.log("[PhantomCSS] Screenshot capture failed: ", ex.message);
+			throw "[PhantomCSS] Resemble.js not found: " + path;
 		}
 	}
 	return path;
