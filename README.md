@@ -54,7 +54,9 @@ From the command line/terminal run
 
 ```javascript
 phantomcss.init({
-	
+	/*
+		libraryRoot is relative to this file and must point to your phantomcss folder (not lib or node_modules). If you are using NPM, this will be './node_modules/phantomcss'
+	*/
 	libraryRoot: './modules/PhantomCSS',
 	
 	screenshotRoot: './screenshots',
