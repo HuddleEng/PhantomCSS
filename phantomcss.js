@@ -25,6 +25,7 @@ var diffsCreated = [];
 
 var _resemblePath;
 var _resembleContainerPath;
+var _libraryRoot;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
@@ -49,9 +50,11 @@ function update(options){
 
 	casper = options.casper || casper;
 
-	_resemblePath = getResemblePath(options.libraryRoot || '.');
+	_libraryRoot = options.libraryRoot || _libraryRoot || '.';
 
-	_resembleContainerPath = (options.libraryRoot || '.') + fs.separator + 'resemblejscontainer.html'
+	_resemblePath = _resemblePath || getResemblePath(_libraryRoot);
+
+	_resembleContainerPath = _resembleContainerPath || (_libraryRoot + fs.separator + 'resemblejscontainer.html');
 
 	_src = stripslash(options.screenshotRoot || _src);
 	_results = stripslash(options.comparisonResultRoot || _results || _src);
@@ -87,6 +90,7 @@ function init(options){
 }
 
 function getResemblePath(root){
+
 	var path = [root,'libs','resemblejs','resemble.js'].join(fs.separator);
 	if(!fs.isFile(path)){
 		path = [root,'node_modules','resemblejs','resemble.js'].join(fs.separator);
@@ -94,6 +98,7 @@ function getResemblePath(root){
 			throw "[PhantomCSS] Resemble.js not found: " + path;
 		}
 	}
+
 	return path;
 }
 
