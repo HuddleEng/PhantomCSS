@@ -15,6 +15,7 @@ var _realPath;
 var _diffsToProcess = [];
 var exitStatus;
 var _hideElements;
+var _waitTimeout = 60000;
 var _addLabelToFailedImage = true;
 var _test_match;
 var _test_exclude;
@@ -49,6 +50,8 @@ function update(options){
 	options = options || {};
 
 	casper = options.casper || casper;
+
+	_waitTimeout = options.waitTimeout || _waitTimeout;
 
 	_libraryRoot = options.libraryRoot || _libraryRoot || '.';
 
@@ -265,7 +268,7 @@ function asyncCompare(one, two, func){
 		}, function(){
 			func(false);
 		},
-		10000
+		_waitTimeout
 	);
 }
 
@@ -396,7 +399,7 @@ function compareFiles(baseFile, file) {
 							}
 
 						}, function(){},
-						10000
+						_waitTimeout
 					);
 				} else {
                     test.success = true;
@@ -451,7 +454,7 @@ function waitForTests(tests){
 		}, function(){
 
 		},
-		10000);
+		_waitTimeout);
 	});
 }
 
