@@ -1,28 +1,28 @@
 {
-  "name": "phantomcss",
-  "version": "0.9.1",
-  "description": "A CasperJS module for automating visual regression testing of Web apps, live style guides and responsive layouts.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Huddle/PhantomCSS.git"
-  },
-  "main": "phantomcss.js",
-  "keywords": [
-    "css",
-    "phantomjs",
-    "casperjs",
-    "testing",
-    "visual regression",
-    "responsive"
-  ],
-  "author": "James Cryer / Huddle",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Huddle/PhantomCSS/issues"
-  },
-  "dependencies": {
-    "phantomjs": "1.9.7-14",
-    "casperjs": "~1.1.0-beta3",
-    "resemblejs": "~1.2.0"
-  }
+	"name": "phantomcss",
+	"version": "0.9.2",
+	"description": "A CasperJS module for automating visual regression testing of Web apps, live style guides and responsive layouts.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Huddle/PhantomCSS.git"
+	},
+	"main": "phantomcss.js",
+	"keywords": [
+		"css",
+		"phantomjs",
+		"casperjs",
+		"testing",
+		"visual regression",
+		"responsive"
+	],
+	"author": "James Cryer / Huddle",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Huddle/PhantomCSS/issues"
+	},
+	"dependencies": {
+		"phantomjs": "1.9.7-14",
+		"casperjs": "~1.1.0-beta3",
+		"resemblejs": "~1.2.0"
+	}
 }
