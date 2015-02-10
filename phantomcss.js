@@ -1,5 +1,5 @@
 /*
-James Cryer / Huddle / 2014
+James Cryer / Huddle / 2015
 https://github.com/Huddle/PhantomCSS
 http://tldr.huddle.com/blog/css-testing/
 */
@@ -27,6 +27,7 @@ var diffsCreated = [];
 var _resemblePath;
 var _resembleContainerPath;
 var _libraryRoot;
+var _rebase = false;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
@@ -74,6 +75,8 @@ function update( options ) {
 	_hideElements = options.hideElements;
 
 	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
+
+	_rebase = typeof options.rebase !== 'undefined' ? options.rebase : _rebase;
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
@@ -142,6 +145,9 @@ function _fileNameGetter( root, fileName ) {
 	}
 }
 
+function _replaceDiffSuffix(str){
+	return str.replace( '.diff', '' );
+}
 
 function screenshot( target, timeToWait, hideSelector, fileName ) {
 	var name;
@@ -167,18 +173,37 @@ function isComponentsConfig( obj ) {
 	return ( obj instanceof Object ) && ( isClipRect( obj ) === false );
 }
 
+function grab(filepath, target){
+	if ( isClipRect( target ) ) {
+		casper.capture( filepath, target );
+	} else {
+		casper.captureSelector( filepath, target );
+	}
+}
+
 function capture( srcPath, resultPath, target ) {
-	var originalForResult = resultPath.replace( '.diff', '' );
-	var originalFromSource = srcPath.replace( '.diff', '' );
+	var originalForResult = _replaceDiffSuffix(resultPath);
+	var originalFromSource = _replaceDiffSuffix(srcPath);
 
 	try {
 
-		if ( isThisImageADiff( resultPath ) ) {
-			if ( isClipRect( target ) ) {
-				casper.capture( resultPath, target );
-			} else {
-				casper.captureSelector( resultPath, target );
+		if(_rebase){
+
+			grab(originalFromSource, target);
+			
+			if ( isThisImageADiff( resultPath ) ){
+				// Tidy up. Remove old diff after rebase
+				removeFile( resultPath );
 			}
+
+			_onNewImage( {
+				filename: originalFromSource
+			} );
+
+		} else if ( isThisImageADiff( resultPath ) ) {
+
+			grab(resultPath, target);
+
 			diffsCreated.push( resultPath );
 
 			if ( srcPath !== resultPath ) {
@@ -188,15 +213,11 @@ function capture( srcPath, resultPath, target ) {
 
 		} else {
 
-			if ( isClipRect( target ) ) {
-				casper.capture( srcPath, target );
-			} else {
-				casper.captureSelector( srcPath, target );
-			}
+			grab(srcPath, target);
 
 			if ( srcPath !== resultPath ) {
 				// can't use copyAndReplaceFile yet, so just capture again
-				casper.captureSelector( resultPath, target );
+				grab(resultPath, target);
 			}
 
 			_onNewImage( {
@@ -224,10 +245,14 @@ function isThisImageADiff( path ) {
 }
 
 function copyAndReplaceFile( src, dest ) {
-	if ( fs.isFile( dest ) ) {
-		fs.remove( dest );
-	}
+	removeFile( dest );
 	fs.copy( src, dest );
+}
+
+function removeFile(filepath){
+	if ( fs.isFile( filepath ) ) {
+		fs.remove( filepath );
+	}	
 }
 
 function asyncCompare( one, two, func ) {
@@ -434,7 +459,7 @@ function compareAll( exclude, list ) {
 	}
 
 	_diffsToProcess.forEach( function ( file ) {
-		var baseFile = file.replace( '.diff', '' );
+		var baseFile = _replaceDiffSuffix(file);
 		tests.push( compareFiles( baseFile, file ) );
 	} );
 	waitForTests( tests );

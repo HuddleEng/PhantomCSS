@@ -4,7 +4,9 @@
 */
 var phantomcss = require('./../phantomcss.js');
 
-phantomcss.init(/*{
+phantomcss.init({
+	rebase: casper.cli.get("rebase")
+	/*
 	screenshotRoot: '/screenshots',
 	failedComparisonsRoot: '/failures'
 	casper: specific_instance_of_casper,
@@ -24,8 +26,8 @@ phantomcss.init(/*{
 		},
 		errorType: 'movement',
 		transparency: 0.3
-	}
-}*/);
+	}*/
+});
 
 
 /*
