@@ -110,6 +110,7 @@ function turnOffAnimations() {
 	casper.evaluate( function turnOffAnimations() {
 
 		function disableAnimations() {
+			var jQuery = window.jQuery;
 			if ( jQuery ) {
 				jQuery.fx.off = true;
 			}
@@ -614,6 +615,7 @@ function setVisibilityToHidden( s1, s2 ) {
 	var elements;
 	var i;
 
+	var jQuery = window.jQuery;
 	if ( jQuery ) {
 		if ( s1 ) {
 			jQuery( s1 ).css( 'visibility', 'hidden' );
