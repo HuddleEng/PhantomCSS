@@ -516,8 +516,8 @@ function initClient() {
 			var div = document.createElement( 'div' );
 
 			// this is a bit of hack, need to get images into browser for analysis
-			div.style = "display:block;position:absolute;border:0;top:-1px;left:-1px;height:1px;width:1px;overflow:hidden;";
-			div.innerHTML = '<form id="image-diff">' +
+			div.style = "display:block;position:absolute;border:0;top:10px;left:0;";
+			// div.style = "display:block;position:absolute;border:0;top:0;left:0;height:1px;width:1px;";
 				'<input type="file" id="image-diff-one" name="one"/>' +
 				'<input type="file" id="image-diff-two" name="two"/>' +
 				'</form><div id="image-diff"></div>';
