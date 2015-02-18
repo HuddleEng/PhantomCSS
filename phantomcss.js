@@ -275,7 +275,7 @@ function asyncCompare( one, two, func ) {
 		initClient();
 	}
 
-	casper.fill( 'form#image-diff', {
+	casper.fill( 'form#image-diff-form', {
 		'one': one,
 		'two': two
 	} );
@@ -518,6 +518,7 @@ function initClient() {
 			// this is a bit of hack, need to get images into browser for analysis
 			div.style = "display:block;position:absolute;border:0;top:10px;left:0;";
 			// div.style = "display:block;position:absolute;border:0;top:0;left:0;height:1px;width:1px;";
+			div.innerHTML = '<form id="image-diff-form">' +
 				'<input type="file" id="image-diff-one" name="one"/>' +
 				'<input type="file" id="image-diff-two" name="two"/>' +
 				'</form><div id="image-diff"></div>';
