@@ -238,7 +238,7 @@ function capture( srcPath, resultPath, target ) {
 		}
 
 	} catch ( ex ) {
-		console.log( "[PhantomCSS] Screenshot capture failed: ", ex.message );
+		console.log( "[PhantomCSS] Screenshot capture failed: " + ex.message );
 	}
 }
 
@@ -338,7 +338,7 @@ function getDiffs( path ) {
 			if ( _test_match ) {
 				if ( _test_match.test( _realPath.toLowerCase() ) ) {
 					if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
-						console.log( '[PhantomCSS] Analysing', _realPath );
+						console.log( '[PhantomCSS] Analysing ' + _realPath );
 						_diffsToProcess.push( filePath );
 					}
 				}
@@ -422,7 +422,7 @@ function compareFiles( baseFile, file ) {
 								casper.captureSelector( failFile, 'img' );
 
 								test.failFile = failFile;
-								console.log( 'Failure! Saved to', failFile );
+								console.log( 'Failure! Saved to ' + failFile );
 							}
 
 							if ( file.indexOf( '.diff.png' ) !== -1 ) {
