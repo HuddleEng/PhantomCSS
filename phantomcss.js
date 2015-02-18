@@ -98,9 +98,9 @@ function init( options ) {
 function getResemblePath( root ) {
 
 	var path = [ root, 'libs', 'resemblejs', 'resemble.js' ].join( fs.separator );
-	if ( !fs.isFile( path ) ) {
+	if ( !_isFile( path ) ) {
 		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
-		if ( !fs.isFile( path ) ) {
+		if ( !_isFile( path ) ) {
 			throw "[PhantomCSS] Resemble.js not found: " + path;
 		}
 	}
@@ -137,8 +137,7 @@ function _fileNameGetter( root, fileName ) {
 
 	fileName = fileName || "screenshot";
 	name = root + fs.separator + fileName + "_" + _count++;
-
-	if ( fs.isFile( name + '.png' ) ) {
+	if ( _isFile( name + '.png' ) ) {
 		return name + '.diff.png';
 	} else {
 		return name + '.png';
@@ -147,6 +146,19 @@ function _fileNameGetter( root, fileName ) {
 
 function _replaceDiffSuffix(str){
 	return str.replace( '.diff', '' );
+}
+
+function _isFile(path) {
+	var exists = false;
+	try {
+		exists = fs.isFile(path);
+	} catch (e) {
+		if (e.name != 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST') {
+			// We weren't expecting this exception
+			throw e;
+		}
+	}
+	return exists;
 }
 
 function screenshot( target, timeToWait, hideSelector, fileName ) {
@@ -250,7 +262,7 @@ function copyAndReplaceFile( src, dest ) {
 }
 
 function removeFile(filepath){
-	if ( fs.isFile( filepath ) ) {
+	if ( _isFile( filepath ) ) {
 		fs.remove( filepath );
 	}	
 }
@@ -368,11 +380,11 @@ function compareFiles( baseFile, file ) {
 		filename: baseFile
 	};
 
-	if ( !fs.isFile( baseFile ) ) {
+	if ( !_isFile( baseFile ) ) {
 		test.error = true;
 	} else {
 
-		if ( !fs.isFile( _resembleContainerPath ) ) {
+		if ( !_isFile( _resembleContainerPath ) ) {
 			console.log( '[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. (' + _resembleContainerPath + ')' );
 			test.error = true;
 			return;
@@ -401,7 +413,7 @@ function compareFiles( baseFile, file ) {
 								safeFileName = failFile;
 								increment = 0;
 
-								while ( fs.isFile( safeFileName + '.fail.png' ) ) {
+								while ( _isFile( safeFileName + '.fail.png' ) ) {
 									increment++;
 									safeFileName = failFile + '.' + increment;
 								}
