@@ -55,6 +55,7 @@ URL: https://github.com/Huddle/Resemble.js
 
 		var ignoreAntialiasing = false;
 		var ignoreColors = false;
+		var ignoreCrossDomain = false;
 
 		function triggerDataUpdate(){
 			var len = updateCallbackArray.length;
@@ -110,8 +111,9 @@ URL: https://github.com/Huddle/Resemble.js
 		function loadImageData( fileData, callback ){
 			var fileReader;
 			var hiddenImage = new Image();
-                        hiddenImage.setAttribute("crossOrigin", "crossOrigin");
-
+			if (!ignoreCrossDomain) {
+				hiddenImage.setAttribute("crossOrigin", "crossOrigin");
+			}
 			hiddenImage.onload = function() {
 
 				var hiddenCanvas =  document.createElement('canvas');
@@ -542,6 +544,13 @@ URL: https://github.com/Huddle/Resemble.js
 
 					ignoreAntialiasing = false;
 					ignoreColors = true;
+
+					if(hasMethod) { param(); }
+					return self;
+				},
+				ignoreCrossDomain: function(){
+
+					ignoreCrossDomain = true;
 
 					if(hasMethod) { param(); }
 					return self;
