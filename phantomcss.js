@@ -182,7 +182,7 @@ function screenshot( target, timeToWait, hideSelector, fileName ) {
 }
 
 function isComponentsConfig( obj ) {
-	return ( obj instanceof Object ) && ( isClipRect( obj ) === false );
+	return ( Object.prototype.toString.call(obj) == '[object Object]' ) && ( isClipRect( obj ) === false );
 }
 
 function grab(filepath, target){
