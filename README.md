@@ -33,10 +33,9 @@ From the command line/terminal run:
 
 * `casperjs test demo/testsuite.js`
 
-Some useful CasperJS CLI options:
-* `casperjs test --verbose --log-level=debug demo/testsuite.js`
-* `casperjs test demo/testsuite.js --engine=slimerjs`
-* `casperjs test demo/testsuite.js --engine=phantomjs`
+or
+
+* `casperjs test demo/testsuite.js --verbose --log-level=debug`
 
 ### Download
 
@@ -55,15 +54,26 @@ Some useful CasperJS CLI options:
 * In the failures folder some images should have been created. The images should show bright pink where the screenshot has visually changed
 * If you want to manually compare the images, go to the screenshot folder to see the original/baseline and latest screenshots
 
+### SlimerJS
+
+SlimerJS uses the Gecko browser engine rather than Webkit.  It currently has better support for Webfonts and can load Flash content if the plugin is installed. If this is of interest to you, please follow the [download and install](http://slimerjs.org/download.html) instructions and ensure SlimerJS is installed globally.
+
+* `casperjs test demo/testsuite.js --engine=slimerjs`
+
+### PhantomJS 2
+
+The latest and greatest version of PhantomJS is not currently supported, as soon as CasperJS has confirmed full support we can look to update PhantomCSS. If (in the future) support has become viable, and you're eager to upgrade, please create and Issue and/or Pull Request.
+
 ### Options and setup
+
+If you are using SlimerJS, you will need to specify absolute paths (see 'demo').
 
 ```javascript
 phantomcss.init({
 	/*
 		libraryRoot is relative to this file and must point to your 
 		phantomcss folder (not lib or node_modules). If you are using 
-		NPM, this will be './node_modules/phantomcss'. If you are using
-		SlimerJS, you will need absolute paths (see 'demo').
+		NPM, this will be './node_modules/phantomcss'.
 	*/
 	libraryRoot: './modules/PhantomCSS',
 	
@@ -73,15 +83,13 @@ phantomcss.init({
 		By default, failure images are put in the './failures' folder. 
 		If failedComparisonsRoot is set to false a separate folder will 
 		not be created but failure images can still be found alongside 
-		the original and new images. If you are using
-		SlimerJS, you will need absolute paths (see 'demo').
+		the original and new images.
 	*/
 	failedComparisonsRoot: './failures',
 
 	/*
 		Remove results directory tree after run.  Use in conjunction 
-		with failedComparisonsRoot to see failed comparisons. If you are using
-		SlimerJS, you will need absolute paths (see 'demo').
+		with failedComparisonsRoot to see failed comparisons.
 	*/
 	cleanupComparisonImages: true,
 
