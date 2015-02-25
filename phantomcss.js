@@ -153,7 +153,7 @@ function _isFile( path ) {
 	try {
 		exists = fs.isFile( path );
 	} catch ( e ) {
-		if ( e.name !== 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST' ) {
+		if ( e.name !== 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST' && e.name !== 'NS_ERROR_FILE_NOT_FOUND' ) {
 			// We weren't expecting this exception
 			throw e;
 		}
