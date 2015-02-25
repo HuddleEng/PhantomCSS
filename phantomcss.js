@@ -144,16 +144,16 @@ function _fileNameGetter( root, fileName ) {
 	}
 }
 
-function _replaceDiffSuffix(str){
+function _replaceDiffSuffix( str ) {
 	return str.replace( '.diff', '' );
 }
 
-function _isFile(path) {
+function _isFile( path ) {
 	var exists = false;
 	try {
-		exists = fs.isFile(path);
-	} catch (e) {
-		if (e.name != 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST') {
+		exists = fs.isFile( path );
+	} catch ( e ) {
+		if ( e.name !== 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST' ) {
 			// We weren't expecting this exception
 			throw e;
 		}
@@ -182,10 +182,10 @@ function screenshot( target, timeToWait, hideSelector, fileName ) {
 }
 
 function isComponentsConfig( obj ) {
-	return ( Object.prototype.toString.call(obj) == '[object Object]' ) && ( isClipRect( obj ) === false );
+	return ( Object.prototype.toString.call( obj ) === '[object Object]' ) && ( isClipRect( obj ) === false );
 }
 
-function grab(filepath, target){
+function grab( filepath, target ) {
 	if ( isClipRect( target ) ) {
 		casper.capture( filepath, target );
 	} else {
@@ -194,16 +194,16 @@ function grab(filepath, target){
 }
 
 function capture( srcPath, resultPath, target ) {
-	var originalForResult = _replaceDiffSuffix(resultPath);
-	var originalFromSource = _replaceDiffSuffix(srcPath);
+	var originalForResult = _replaceDiffSuffix( resultPath );
+	var originalFromSource = _replaceDiffSuffix( srcPath );
 
 	try {
 
-		if(_rebase){
+		if ( _rebase ) {
 
-			grab(originalFromSource, target);
-			
-			if ( isThisImageADiff( resultPath ) ){
+			grab( originalFromSource, target );
+
+			if ( isThisImageADiff( resultPath ) ) {
 				// Tidy up. Remove old diff after rebase
 				removeFile( resultPath );
 			}
@@ -214,7 +214,7 @@ function capture( srcPath, resultPath, target ) {
 
 		} else if ( isThisImageADiff( resultPath ) ) {
 
-			grab(resultPath, target);
+			grab( resultPath, target );
 
 			diffsCreated.push( resultPath );
 
@@ -225,11 +225,11 @@ function capture( srcPath, resultPath, target ) {
 
 		} else {
 
-			grab(srcPath, target);
+			grab( srcPath, target );
 
 			if ( srcPath !== resultPath ) {
 				// can't use copyAndReplaceFile yet, so just capture again
-				grab(resultPath, target);
+				grab( resultPath, target );
 			}
 
 			_onNewImage( {
@@ -261,10 +261,10 @@ function copyAndReplaceFile( src, dest ) {
 	fs.copy( src, dest );
 }
 
-function removeFile(filepath){
+function removeFile( filepath ) {
 	if ( _isFile( filepath ) ) {
 		fs.remove( filepath );
-	}	
+	}
 }
 
 function asyncCompare( one, two, func ) {
@@ -471,7 +471,7 @@ function compareAll( exclude, list ) {
 	}
 
 	_diffsToProcess.forEach( function ( file ) {
-		var baseFile = _replaceDiffSuffix(file);
+		var baseFile = _replaceDiffSuffix( file );
 		tests.push( compareFiles( baseFile, file ) );
 	} );
 	waitForTests( tests );
