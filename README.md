@@ -3,7 +3,7 @@
 PhantomCSS
 ==========
 
-**CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
+**CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) or [SlimerJS](http://slimerjs.org/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
 ### What?
 
@@ -29,9 +29,14 @@ casper.
 	});
 ```
 
-From the command line/terminal run
+From the command line/terminal run:
 
 * `casperjs test demo/testsuite.js`
+
+Some useful CasperJS CLI options:
+* `casperjs test --verbose --log-level=debug demo/testsuite.js`
+* `casperjs test demo/testsuite.js --engine=slimerjs`
+* `casperjs test demo/testsuite.js --engine=phantomjs`
 
 ### Download
 
@@ -57,7 +62,8 @@ phantomcss.init({
 	/*
 		libraryRoot is relative to this file and must point to your 
 		phantomcss folder (not lib or node_modules). If you are using 
-		NPM, this will be './node_modules/phantomcss'
+		NPM, this will be './node_modules/phantomcss'. If you are using
+		SlimerJS, you will need absolute paths (see 'demo').
 	*/
 	libraryRoot: './modules/PhantomCSS',
 	
@@ -67,15 +73,22 @@ phantomcss.init({
 		By default, failure images are put in the './failures' folder. 
 		If failedComparisonsRoot is set to false a separate folder will 
 		not be created but failure images can still be found alongside 
-		the original and new images.
+		the original and new images. If you are using
+		SlimerJS, you will need absolute paths (see 'demo').
 	*/
 	failedComparisonsRoot: './failures',
 
 	/*
 		Remove results directory tree after run.  Use in conjunction 
-		with failedComparisonsRoot to see failed comparisons
+		with failedComparisonsRoot to see failed comparisons. If you are using
+		SlimerJS, you will need absolute paths (see 'demo').
 	*/
 	cleanupComparisonImages: true,
+
+	/*
+		A reference to a particular Casper instance. Required for SlimerJS.
+	*/
+	casper: specific_instance_of_casper,
 
 	/*
 		You might want to keep master/baseline images in a completely 

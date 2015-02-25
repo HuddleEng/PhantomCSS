@@ -98,9 +98,9 @@ function init( options ) {
 function getResemblePath( root ) {
 
 	var path = [ root, 'libs', 'resemblejs', 'resemble.js' ].join( fs.separator );
-	if ( !fs.isFile( path ) ) {
+	if ( !_isFile( path ) ) {
 		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
-		if ( !fs.isFile( path ) ) {
+		if ( !_isFile( path ) ) {
 			throw "[PhantomCSS] Resemble.js not found: " + path;
 		}
 	}
@@ -137,16 +137,28 @@ function _fileNameGetter( root, fileName ) {
 
 	fileName = fileName || "screenshot";
 	name = root + fs.separator + fileName + "_" + _count++;
-
-	if ( fs.isFile( name + '.png' ) ) {
+	if ( _isFile( name + '.png' ) ) {
 		return name + '.diff.png';
 	} else {
 		return name + '.png';
 	}
 }
 
-function _replaceDiffSuffix(str){
+function _replaceDiffSuffix( str ) {
 	return str.replace( '.diff', '' );
+}
+
+function _isFile( path ) {
+	var exists = false;
+	try {
+		exists = fs.isFile( path );
+	} catch ( e ) {
+		if ( e.name !== 'NS_ERROR_FILE_TARGET_DOES_NOT_EXIST' && e.name !== 'NS_ERROR_FILE_NOT_FOUND' ) {
+			// We weren't expecting this exception
+			throw e;
+		}
+	}
+	return exists;
 }
 
 function screenshot( target, timeToWait, hideSelector, fileName ) {
@@ -170,10 +182,10 @@ function screenshot( target, timeToWait, hideSelector, fileName ) {
 }
 
 function isComponentsConfig( obj ) {
-	return ( obj instanceof Object ) && ( isClipRect( obj ) === false );
+	return ( Object.prototype.toString.call( obj ) === '[object Object]' ) && ( isClipRect( obj ) === false );
 }
 
-function grab(filepath, target){
+function grab( filepath, target ) {
 	if ( isClipRect( target ) ) {
 		casper.capture( filepath, target );
 	} else {
@@ -182,16 +194,16 @@ function grab(filepath, target){
 }
 
 function capture( srcPath, resultPath, target ) {
-	var originalForResult = _replaceDiffSuffix(resultPath);
-	var originalFromSource = _replaceDiffSuffix(srcPath);
+	var originalForResult = _replaceDiffSuffix( resultPath );
+	var originalFromSource = _replaceDiffSuffix( srcPath );
 
 	try {
 
-		if(_rebase){
+		if ( _rebase ) {
 
-			grab(originalFromSource, target);
-			
-			if ( isThisImageADiff( resultPath ) ){
+			grab( originalFromSource, target );
+
+			if ( isThisImageADiff( resultPath ) ) {
 				// Tidy up. Remove old diff after rebase
 				removeFile( resultPath );
 			}
@@ -202,7 +214,7 @@ function capture( srcPath, resultPath, target ) {
 
 		} else if ( isThisImageADiff( resultPath ) ) {
 
-			grab(resultPath, target);
+			grab( resultPath, target );
 
 			diffsCreated.push( resultPath );
 
@@ -213,11 +225,11 @@ function capture( srcPath, resultPath, target ) {
 
 		} else {
 
-			grab(srcPath, target);
+			grab( srcPath, target );
 
 			if ( srcPath !== resultPath ) {
 				// can't use copyAndReplaceFile yet, so just capture again
-				grab(resultPath, target);
+				grab( resultPath, target );
 			}
 
 			_onNewImage( {
@@ -226,7 +238,7 @@ function capture( srcPath, resultPath, target ) {
 		}
 
 	} catch ( ex ) {
-		console.log( "[PhantomCSS] Screenshot capture failed: ", ex.message );
+		console.log( "[PhantomCSS] Screenshot capture failed: " + ex.message );
 	}
 }
 
@@ -249,10 +261,10 @@ function copyAndReplaceFile( src, dest ) {
 	fs.copy( src, dest );
 }
 
-function removeFile(filepath){
-	if ( fs.isFile( filepath ) ) {
+function removeFile( filepath ) {
+	if ( _isFile( filepath ) ) {
 		fs.remove( filepath );
-	}	
+	}
 }
 
 function asyncCompare( one, two, func ) {
@@ -263,7 +275,7 @@ function asyncCompare( one, two, func ) {
 		initClient();
 	}
 
-	casper.fill( 'form#image-diff', {
+	casper.fill( 'form#image-diff-form', {
 		'one': one,
 		'two': two
 	} );
@@ -326,7 +338,7 @@ function getDiffs( path ) {
 			if ( _test_match ) {
 				if ( _test_match.test( _realPath.toLowerCase() ) ) {
 					if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
-						console.log( '[PhantomCSS] Analysing', _realPath );
+						console.log( '[PhantomCSS] Analysing ' + _realPath );
 						_diffsToProcess.push( filePath );
 					}
 				}
@@ -368,11 +380,11 @@ function compareFiles( baseFile, file ) {
 		filename: baseFile
 	};
 
-	if ( !fs.isFile( baseFile ) ) {
+	if ( !_isFile( baseFile ) ) {
 		test.error = true;
 	} else {
 
-		if ( !fs.isFile( _resembleContainerPath ) ) {
+		if ( !_isFile( _resembleContainerPath ) ) {
 			console.log( '[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. (' + _resembleContainerPath + ')' );
 			test.error = true;
 			return;
@@ -401,7 +413,7 @@ function compareFiles( baseFile, file ) {
 								safeFileName = failFile;
 								increment = 0;
 
-								while ( fs.isFile( safeFileName + '.fail.png' ) ) {
+								while ( _isFile( safeFileName + '.fail.png' ) ) {
 									increment++;
 									safeFileName = failFile + '.' + increment;
 								}
@@ -410,7 +422,7 @@ function compareFiles( baseFile, file ) {
 								casper.captureSelector( failFile, 'img' );
 
 								test.failFile = failFile;
-								console.log( 'Failure! Saved to', failFile );
+								console.log( 'Failure! Saved to ' + failFile );
 							}
 
 							if ( file.indexOf( '.diff.png' ) !== -1 ) {
@@ -459,7 +471,7 @@ function compareAll( exclude, list ) {
 	}
 
 	_diffsToProcess.forEach( function ( file ) {
-		var baseFile = _replaceDiffSuffix(file);
+		var baseFile = _replaceDiffSuffix( file );
 		tests.push( compareFiles( baseFile, file ) );
 	} );
 	waitForTests( tests );
@@ -504,8 +516,9 @@ function initClient() {
 			var div = document.createElement( 'div' );
 
 			// this is a bit of hack, need to get images into browser for analysis
-			div.style = "display:block;position:absolute;border:0;top:-1px;left:-1px;height:1px;width:1px;overflow:hidden;";
-			div.innerHTML = '<form id="image-diff">' +
+			div.style = "display:block;position:absolute;border:0;top:10px;left:0;";
+			// div.style = "display:block;position:absolute;border:0;top:0;left:0;height:1px;width:1px;";
+			div.innerHTML = '<form id="image-diff-form">' +
 				'<input type="file" id="image-diff-one" name="one"/>' +
 				'<input type="file" id="image-diff-two" name="two"/>' +
 				'</form><div id="image-diff"></div>';
