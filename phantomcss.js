@@ -553,7 +553,6 @@ function initClient() {
 				resemble( document.getElementById( 'image-diff-one' ).files[ 0 ] ).
 				compareTo( document.getElementById( 'image-diff-two' ).files[ 0 ] ).
 				ignoreAntialiasing(). // <-- muy importante
-				ignoreCrossDomain().
 				onComplete( function ( data ) {
 					var diffImage;
 
