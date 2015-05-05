@@ -28,6 +28,7 @@ var _resemblePath;
 var _resembleContainerPath;
 var _libraryRoot;
 var _rebase = false;
+var _prefixCount = false;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
@@ -65,6 +66,8 @@ function update( options ) {
 	_failures = options.failedComparisonsRoot === false ? false : stripslash( options.failedComparisonsRoot || _failures );
 
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
+
+  _prefixCount = options.prefixCount || _prefixCount;
 
 	_onPass = options.onPass || _onPass;
 	_onFail = options.onFail || _onFail;
@@ -136,7 +139,13 @@ function _fileNameGetter( root, fileName ) {
 	var name;
 
 	fileName = fileName || "screenshot";
-	name = root + fs.separator + fileName + "_" + _count++;
+
+  if (_prefixCount) {
+    name = root + fs.separator + _count++ + "_" + fileName;
+  } else {
+    name = root + fs.separator + fileName + "_" + _count++;
+  }
+
 	if ( _isFile( name + '.png' ) ) {
 		return name + '.diff.png';
 	} else {

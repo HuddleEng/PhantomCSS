@@ -156,6 +156,11 @@ phantomcss.init({
 	},
 
 	/*
+		Prefix the screenshot number to the filename, instead of suffixing it
+	*/
+	prefixCount: true,
+
+	/*
 		Output styles for image failure outputs genrated by 
 		Resemble.js
 	*/
