@@ -67,7 +67,7 @@ function update( options ) {
 
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
 
-  _prefixCount = options.prefixCount || _prefixCount;
+	_prefixCount = options.prefixCount || _prefixCount;
 
 	_onPass = options.onPass || _onPass;
 	_onFail = options.onFail || _onFail;
@@ -140,11 +140,11 @@ function _fileNameGetter( root, fileName ) {
 
 	fileName = fileName || "screenshot";
 
-  if (_prefixCount) {
-    name = root + fs.separator + _count++ + "_" + fileName;
-  } else {
-    name = root + fs.separator + fileName + "_" + _count++;
-  }
+	if (_prefixCount) {
+		name = root + fs.separator + _count++ + "_" + fileName;
+	} else {
+		name = root + fs.separator + fileName + "_" + _count++;
+	}
 
 	if ( _isFile( name + '.png' ) ) {
 		return name + '.diff.png';
