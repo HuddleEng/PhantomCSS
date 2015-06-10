@@ -38,6 +38,7 @@ exports.compareSession = compareSession;
 exports.compareFiles = compareFiles;
 exports.waitForTests = waitForTests;
 exports.init = init;
+exports.done = done;
 exports.update = update;
 exports.turnOffAnimations = turnOffAnimations;
 exports.getExitStatus = getExitStatus;
@@ -96,6 +97,10 @@ function update( options ) {
 
 function init( options ) {
 	update( options );
+}
+
+function done(){
+	_count = 0;
 }
 
 function getResemblePath( root ) {
