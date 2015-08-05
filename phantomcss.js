@@ -289,9 +289,9 @@ function asyncCompare( one, two, func ) {
 		initClient();
 	}
 
-	casper.fill( 'form#image-diff-form', {
-		'one': one,
-		'two': two
+	casper.fillSelectors( 'form#image-diff-form', {
+		'[name=one]': one,
+		'[name=two]': two
 	} );
 
 	casper.evaluate( function ( filename ) {
