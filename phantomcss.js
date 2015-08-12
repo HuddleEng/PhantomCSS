@@ -30,6 +30,10 @@ var _libraryRoot;
 var _rebase = false;
 var _prefixCount = false;
 
+var _baselineImageSuffix = "";
+var _diffImageSuffix = ".diff";
+var _failureImageSuffix = ".fail";
+
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
 exports.compareMatched = compareMatched;
@@ -85,6 +89,10 @@ function update( options ) {
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
 	_cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
+
+	_baselineImageSuffix = options.baselineImageSuffix || _baselineImageSuffix;
+	_diffImageSuffix = options.diffImageSuffix || _diffImageSuffix;
+	_failureImageSuffix = options.failureImageSuffix || _failureImageSuffix;
 
 	if ( options.addLabelToFailedImage !== undefined ) {
 		_addLabelToFailedImage = options.addLabelToFailedImage;
@@ -151,15 +159,15 @@ function _fileNameGetter( root, fileName ) {
 		name = root + fs.separator + fileName + "_" + _count++;
 	}
 
-	if ( _isFile( name + '.png' ) ) {
-		return name + '.diff.png';
+	if ( _isFile( name + _baselineImageSuffix + '.png' ) ) {
+		return name + _diffImageSuffix + '.png';
 	} else {
-		return name + '.png';
+		return name + _baselineImageSuffix + '.png';
 	}
 }
 
 function _replaceDiffSuffix( str ) {
-	return str.replace( '.diff', '' );
+	return str.replace( _diffImageSuffix, _baselineImageSuffix );
 }
 
 function _isFile( path ) {
@@ -267,7 +275,9 @@ function isClipRect( value ) {
 }
 
 function isThisImageADiff( path ) {
-	return /\.diff\.png/.test( path );
+	var sanitizedDiffSuffix = _diffImageSuffix.replace( /[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&" );
+	var diffRegex = new RegExp( sanitizedDiffSuffix + "\\.png" );
+	return diffRegex.test( path );
 }
 
 function copyAndReplaceFile( src, dest ) {
@@ -347,20 +357,16 @@ function getDiffs( path ) {
 
 	if ( fs.isDirectory( _realPath ) ) {
 		fs.list( _realPath ).forEach( getDiffs );
-	} else {
-		if ( /\.diff\./.test( path.toLowerCase() ) ) {
-			if ( _test_match ) {
-				if ( _test_match.test( _realPath.toLowerCase() ) ) {
-					if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
-						console.log( '[PhantomCSS] Analysing ' + _realPath );
-						_diffsToProcess.push( filePath );
-					}
-				}
-			} else {
+	} else if ( isThisImageADiff( path.toLowerCase() ) ) {
+		if ( _test_match ) {
+			if ( _test_match.test( _realPath.toLowerCase() ) ) {
 				if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
+					console.log( '[PhantomCSS] Analysing ' + _realPath );
 					_diffsToProcess.push( filePath );
 				}
 			}
+		} else if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
+			_diffsToProcess.push( filePath );
 		}
 	}
 
@@ -423,26 +429,26 @@ function compareFiles( baseFile, file ) {
 
 							if ( _failures ) {
 								// flattened structure for failed diffs so that it is easier to preview
-								failFile = _failures + fs.separator + file.split( /\/|\\/g ).pop().replace( '.diff.png', '' ).replace( '.png', '' );
+								failFile = _failures + fs.separator + file.split( /\/|\\/g ).pop().replace( _diffImageSuffix + '.png', '' ).replace( '.png', '' );
 								safeFileName = failFile;
 								increment = 0;
 
-								while ( _isFile( safeFileName + '.fail.png' ) ) {
+								while ( _isFile( safeFileName + _failureImageSuffix + '.png' ) ) {
 									increment++;
 									safeFileName = failFile + '.' + increment;
 								}
 
-								failFile = safeFileName + '.fail.png';
+								failFile = safeFileName + _failureImageSuffix + '.png';
 								casper.captureSelector( failFile, 'img' );
 
 								test.failFile = failFile;
 								console.log( 'Failure! Saved to ' + failFile );
 							}
 
-							if ( file.indexOf( '.diff.png' ) !== -1 ) {
-								casper.captureSelector( file.replace( '.diff.png', '.fail.png' ), 'img' );
+							if ( file.indexOf( _diffImageSuffix + '.png' ) !== -1 ) {
+								casper.captureSelector( file.replace( _diffImageSuffix + '.png', _failureImageSuffix + '.png' ), 'img' );
 							} else {
-								casper.captureSelector( file.replace( '.png', '.fail.png' ), 'img' );
+								casper.captureSelector( file.replace( '.png', _failureImageSuffix + '.png' ), 'img' );
 							}
 
 							casper.evaluate( function () {
