@@ -64,7 +64,7 @@ function update( options ) {
 
 	_resemblePath = _resemblePath || getResemblePath( _libraryRoot );
 
-	_resembleContainerPath = _resembleContainerPath || ( _libraryRoot + fs.separator + 'resemblejscontainer.html' );
+	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath( _libraryRoot );
 
 	_src = stripslash( options.screenshotRoot || _src );
 	_results = stripslash( options.comparisonResultRoot || _results || _src );
@@ -122,6 +122,18 @@ function getResemblePath( root ) {
 	}
 
 	return path;
+}
+
+function getResembleContainerPath(root) {
+    var path = [ root, 'resemblejscontainer.html'].join( fs.separator );
+    if ( !_isFile( path )) {
+        path = [ root, 'node_modules', 'phantomcss', 'resemblejscontainer.html'].join( fs.separator );
+        if ( !_isFile( path )) {
+            throw "[PhantomCSS] resemblejscontainer.html not found";
+        }
+    }
+
+    return path;
 }
 
 function turnOffAnimations() {
