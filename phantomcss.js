@@ -64,7 +64,7 @@ function update( options ) {
 
 	_resemblePath = _resemblePath || getResemblePath( _libraryRoot );
 
-	_resembleContainerPath = _resembleContainerPath || _libraryRoot + fs.separator + 'resemblejscontainer.html';
+	_resembleContainerPath = _resembleContainerPath || ( _libraryRoot + fs.separator + 'resemblejscontainer.html' );
 
 	_src = stripslash( options.screenshotRoot || _src );
 	_results = stripslash( options.comparisonResultRoot || _results || _src );
