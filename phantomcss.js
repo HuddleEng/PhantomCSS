@@ -117,7 +117,10 @@ function getResemblePath( root ) {
 	if ( !_isFile( path ) ) {
 		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
 		if ( !_isFile( path ) ) {
-			throw "[PhantomCSS] Resemble.js not found: " + path;
+            path = [ root, '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
+            if ( !_isFile( path ) ) {
+    			throw "[PhantomCSS] Resemble.js not found: " + path;
+            }
 		}
 	}
 
