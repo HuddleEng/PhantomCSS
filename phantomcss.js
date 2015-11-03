@@ -115,7 +115,7 @@ function getResemblePath( root ) {
 
 	var path = [ root, 'libs', 'resemblejs', 'resemble.js' ].join( fs.separator );
 	if ( !_isFile( path ) ) {
-		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
+		path = require.resolve( 'resemblejs/resemble.js' );
 		if ( !_isFile( path ) ) {
             path = [ root, '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
             if ( !_isFile( path ) ) {
