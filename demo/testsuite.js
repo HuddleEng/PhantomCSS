@@ -7,7 +7,7 @@ var fs = require( 'fs' );
 var path = fs.absolute( fs.workingDirectory + '/phantomcss.js' );
 var phantomcss = require( path );
 
-casper.test.begin( 'Coffee machine visual tests', 5, function ( test ) {
+casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 
 	phantomcss.init( {
 		rebase: casper.cli.get( "rebase" ),
@@ -48,7 +48,7 @@ casper.test.begin( 'Coffee machine visual tests', 5, function ( test ) {
 		this.die( "PhantomJS has errored: " + err );
 	} );
 
-	casper.on( 'resourceError', function ( err ) {
+	casper.on( 'resource.error', function ( err ) {
 		casper.log( 'Resource load error: ' + err, 'warning' );
 	} );
 	/*

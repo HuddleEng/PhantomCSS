@@ -1,4 +1,4 @@
-**Huddle is Hiring!** We're always looking for talented Developers and Test Engineers. Visit http://www.huddle.com/careers for open vacancies now, or register your interest for the future.
+**Huddle is Hiring!** We're always looking for talented Developers and Test Engineers. Visit https://talentcommunity.huddle.com/ for open vacancies now, or register your interest for the future.
 
 PhantomCSS
 ==========
@@ -154,6 +154,11 @@ phantomcss.init({
 			return name+'.png';
 		}
 	},
+
+	/*
+		Prefix the screenshot number to the filename, instead of suffixing it
+	*/
+	prefixCount: true,
 
 	/*
 		Output styles for image failure outputs genrated by 
