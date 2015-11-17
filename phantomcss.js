@@ -29,6 +29,7 @@ var _resembleContainerPath;
 var _libraryRoot;
 var _rebase = false;
 var _prefixCount = false;
+var _suffixCount = false;
 
 var _baselineImageSuffix = "";
 var _diffImageSuffix = ".diff";
@@ -158,8 +159,10 @@ function _fileNameGetter( root, fileName ) {
 
 	if (_prefixCount) {
 		name = root + fs.separator + _count++ + "_" + fileName;
-	} else {
+	} else if (_suffixCount) {
 		name = root + fs.separator + fileName + "_" + _count++;
+	} else {
+		name = root + fs.separator + fileName;
 	}
 
 	if ( _isFile( name + _baselineImageSuffix + '.png' ) ) {
