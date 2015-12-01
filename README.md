@@ -39,6 +39,8 @@ or
 
 ### Download
 
+PhantomCSS can be downloaded in various ways:
+
 * `npm install phantomcss` (PhantomCSS is not itself a Node.js module)
 * `bower install phantomcss`
 * `git clone git://github.com/Huddle/PhantomCSS.git`
