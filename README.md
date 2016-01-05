@@ -39,6 +39,8 @@ or
 
 ### Download
 
+PhantomCSS can be downloaded in various ways:
+
 * `npm install phantomcss` (PhantomCSS is not itself a Node.js module)
 * `bower install phantomcss`
 * `git clone git://github.com/Huddle/PhantomCSS.git`
@@ -105,6 +107,12 @@ phantomcss.init({
 		screenshotRoot folder.
 	*/
 	comparisonResultRoot: './results',
+
+	/* 
+		Don't add count number to images. If set to false, a filename is 
+		required when capturing screenshots.
+	*/
+	addIteratorToImage: false,
 
 	/*
 		Don't add label to generated failure image
