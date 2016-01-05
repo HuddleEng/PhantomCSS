@@ -351,41 +351,27 @@ function asyncCompare( one, two, func ) {
 	);
 }
 
-function getDiffs( path ) {
-
-	var filePath;
-
-	if ( ( {
-			'..': 1,
-			'.': 1
-		} )[ path ] ) {
-		return true;
+function getDiffs( root, collection ) {
+	var symDict = { '..': 1, '.': 1};
+	if(!collection) {collection = [];}
+	if ( fs.isDirectory( root ) ) {
+		fs.list( root ).forEach( function(leaf){
+			var newroot = root + fs.separator + leaf;
+			if ( symDict[ leaf ] ) { return true; }
+			getDiffs(newroot, collection);
+		} );
+	} else if ( isThisImageADiff( root.toLowerCase() ) ) {
+		collection.push( root );
 	}
+	return collection;
+}
 
-	if ( _realPath ) {
-		_realPath += fs.separator + path;
-	} else {
-		_realPath = path;
+function filterOn(include, exclude){
+	return function(path){
+		var includeAble = (include === void 0) || include.test( path.toLowerCase() );
+		var excludeAble = exclude && exclude.test( path.toLowerCase() );
+		return !excludeAble && includeAble;
 	}
-
-	filePath = _realPath;
-
-	if ( fs.isDirectory( _realPath ) ) {
-		fs.list( _realPath ).forEach( getDiffs );
-	} else if ( isThisImageADiff( path.toLowerCase() ) ) {
-		if ( _test_match ) {
-			if ( _test_match.test( _realPath.toLowerCase() ) ) {
-				if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
-					console.log( '[PhantomCSS] Analysing ' + _realPath );
-					_diffsToProcess.push( filePath );
-				}
-			}
-		} else if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
-			_diffsToProcess.push( filePath );
-		}
-	}
-
-	_realPath = _realPath.replace( fs.separator + path, '' );
 }
 
 function getCreatedDiffFiles() {
@@ -396,8 +382,7 @@ function getCreatedDiffFiles() {
 
 function compareMatched( match, exclude ) {
 	// Search for diff images, but only compare matched filenames
-	_test_match = typeof match === 'string' ? new RegExp( match ) : match;
-	compareAll( exclude );
+	compareAll( exclude, void 0, match);
 }
 
 function compareExplicit( list ) {
@@ -493,22 +478,26 @@ function compareFiles( baseFile, file ) {
 	return test;
 }
 
-function compareAll( exclude, list ) {
+function str2RegExp(str){
+	return typeof str === 'string' ? new RegExp( str ) : str;
+}
+
+function compareAll( exclude, diffList, include ) {
 	var tests = [];
 
-	_test_exclude = typeof exclude === 'string' ? new RegExp( exclude ) : exclude;
-
-	if ( list ) {
-		_diffsToProcess = list;
-	} else {
-		_realPath = undefined;
-		getDiffs( _results );
+	if ( !diffList ) {
+		diffList = getDiffs( _results );
+		if(exclude || include){
+			diffList = diffList.filter(filterOn( str2RegExp(include), str2RegExp(exclude) ));
+		}
+		//diffList.forEach(function(path){console.log( '[PhantomCSS] Attempting visual comparison of ' + path );})
 	}
 
-	_diffsToProcess.forEach( function ( file ) {
+	diffList.forEach( function ( file ) {
 		var baseFile = _replaceDiffSuffix( file );
 		tests.push( compareFiles( baseFile, file ) );
 	} );
+
 	waitForTests( tests );
 }
 
