@@ -11,14 +11,10 @@ var _results; // for backwards compatibility results and src are the same - but 
 var _failures = '.' + fs.separator + 'failures';
 
 var _count = 0;
-var _realPath;
-var _diffsToProcess = [];
 var exitStatus;
 var _hideElements;
 var _waitTimeout = 60000;
 var _addLabelToFailedImage = true;
-var _test_match;
-var _test_exclude;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings;
 var _cleanupComparisonImages = false;
