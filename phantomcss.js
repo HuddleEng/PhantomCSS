@@ -12,7 +12,7 @@ var _failures = '.' + fs.separator + 'failures';
 
 var _count = 0;
 var _realPath;
-var _currentDirectory;
+var _currentDirectory = '.';
 var _diffsToProcess = [];
 var exitStatus;
 var _hideElements;
