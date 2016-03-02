@@ -1,11 +1,13 @@
 **Huddle is Hiring!** We're always looking for talented Developers and Test Engineers. Visit https://talentcommunity.huddle.com/ for open vacancies now, or register your interest for the future.
 
-PhantomCSS
+PhantomCSS v0
 ==========
 
 **CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) or [SlimerJS](http://slimerjs.org/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
 ### What?
+
+This is the v0 branch which uses PhantomJS 1, the [lastest branch](https://github.com/Huddle/PhantomCSS) uses PhantomJS 2.
 
 PhantomCSS takes screenshots captured by CasperJS and compares them to baseline images using [Resemble.js](http://huddle.github.com/Resemble.js/) to test for rgb pixel differences. PhantomCSS then generates image diffs to help you find the cause.
 
@@ -39,11 +41,11 @@ or
 
 ### Download
 
-PhantomCSS can be downloaded in various ways:
+PhantomCSS v0 can be downloaded in various ways:
 
-* `npm install phantomcss` (PhantomCSS is not itself a Node.js module)
-* `bower install phantomcss`
-* `git clone git://github.com/Huddle/PhantomCSS.git`
+* `npm install phantomcss@0.11.1` (PhantomCSS is not itself a Node.js module)
+* `bower install https://github.com/Huddle/PhantomCSS.git#0.11.1`
+* `git clone -b v0 --single-branch git://github.com/Huddle/PhantomCSS.git`
 
 ### Getting started, try the demo
 
