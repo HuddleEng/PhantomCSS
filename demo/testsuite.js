@@ -6,6 +6,20 @@
 var fs = require( 'fs' );
 var path = fs.absolute( fs.workingDirectory + '/phantomcss.js' );
 var phantomcss = require( path );
+var server = require('webserver').create();
+
+var html = fs.read( fs.absolute( fs.workingDirectory + '/demo/coffeemachine.html' ));
+
+server.listen(8080,function(req,res){
+	res.statusCode = 200;
+	res.headers = {
+		'Cache': 'no-cache',
+		'Content-Type': 'text/html;charset=utf-8'
+	};
+	res.write(html);
+	res.close();
+});
+
 
 casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 
@@ -54,7 +68,8 @@ casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 	/*
 		The test scenario
 	*/
-	casper.start( fs.absolute( fs.workingDirectory + '/demo/coffeemachine.html' ) );
+
+	casper.start( 'http://localhost:8080' );
 
 	casper.viewport( 1024, 768 );
 
@@ -65,7 +80,7 @@ casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 	casper.then( function () {
 		casper.click( '#coffee-machine-button' );
 
-		// wait for modal to fade-in 
+		// wait for modal to fade-in
 		casper.waitForSelector( '#myModal:not([style*="display: none"])',
 			function success() {
 				phantomcss.screenshot( '#myModal', 'coffee machine dialog' );

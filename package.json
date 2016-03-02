@@ -1,6 +1,6 @@
 {
 	"name": "phantomcss",
-	"version": "0.11.1",
+	"version": "1.0.0",
 	"description": "A CasperJS module for automating visual regression testing of Web apps, live style guides and responsive layouts.",
 	"repository": {
 		"type": "git",
@@ -21,8 +21,8 @@
 		"url": "https://github.com/Huddle/PhantomCSS/issues"
 	},
 	"dependencies": {
-		"phantomjs": "1.9.7-14",
-		"casperjs": "~1.1.0-beta3",
-		"resemblejs": "~1.2.1"
+		"phantomjs-prebuilt": "^2.1.4",
+		"casperjs": "git://github.com/n1k0/casperjs.git",
+	  	"resemblejs": "^2.2.0"
 	}
 }
