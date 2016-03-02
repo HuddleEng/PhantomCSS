@@ -1,5 +1,5 @@
 /*
-James Cryer / Huddle / 2015
+James Cryer / Huddle / 2016
 https://github.com/Huddle/PhantomCSS
 http://tldr.huddle.com/blog/css-testing/
 */

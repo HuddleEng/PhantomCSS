@@ -3,7 +3,7 @@
 PhantomCSS
 ==========
 
-**CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS](http://github.com/ariya/phantomjs/) or [SlimerJS](http://slimerjs.org/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
+**CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS 2](http://github.com/ariya/phantomjs/) or [SlimerJS](http://slimerjs.org/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
 
 ### What?
 
@@ -37,6 +37,16 @@ or
 
 * `casperjs test demo/testsuite.js --verbose --log-level=debug`
 
+### Warning
+
+This project is currently tracking the HEAD of the [CasperJS master branch](https://github.com/n1k0/casperjs) to enable [Phantomjs 2](http://phantomjs.org/) support.
+If you are unable to lock down your dependency chain, or would rather use a more stable version of PhantomCSS, please see the [v0 branch](https://github.com/Huddle/PhantomCSS/tree/v0);
+
+### Updating from PhantomCSS v0 to v1
+
+Rendering is quite different with PhantomJS 2, so when you update, old visual tests will start failing.
+If you're tests are green and passing before updating, I would recommend rebasing the visual tests, i.e. delete them, and run the test suite to create a new baseline.
+
 ### Download
 
 PhantomCSS can be downloaded in various ways:
@@ -45,9 +55,11 @@ PhantomCSS can be downloaded in various ways:
 * `bower install phantomcss`
 * `git clone git://github.com/Huddle/PhantomCSS.git`
 
+If you are not installing via NPM, you will need to run `npm install` in the PhantomCSS root folder.
+
 ### Getting started, try the demo
 
-* Mac OSX users should first [install CasperJS 1.1-beta](http://docs.casperjs.org/en/latest/installation.html), easiest with Homebrew.  For convenience I've included CasperJS.bat for Windows users.
+* For convenience I've included CasperJS.bat for Windows users. If you are not a Windows user, you will have to install the latest version of
 * Download or clone this repo and run `casperjs test demo/testsuite.js` in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
 * Find the screenshot folder and have a look at the (baseline) images
 * Run the tests again with `casperjs test demo/testsuite.js`. New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
@@ -58,13 +70,9 @@ PhantomCSS can be downloaded in various ways:
 
 ### SlimerJS
 
-SlimerJS uses the Gecko browser engine rather than Webkit.  It currently has better support for Webfonts and can load Flash content if the plugin is installed. If this is of interest to you, please follow the [download and install](http://slimerjs.org/download.html) instructions and ensure SlimerJS is installed globally.
+SlimerJS uses the Gecko browser engine rather than Webkit.  This has some advantages over PhantomJS, such as a non-headless view. If this is of interest to you, please follow the [download and install](http://slimerjs.org/download.html) instructions and ensure SlimerJS is installed globally.
 
 * `casperjs test demo/testsuite.js --engine=slimerjs`
-
-### PhantomJS 2
-
-The latest and greatest version of PhantomJS is not currently supported, as soon as CasperJS has confirmed full support we can look to update PhantomCSS. If (in the future) support has become viable, and you're eager to upgrade, please create and Issue and/or Pull Request.
 
 ### Options and setup
 
