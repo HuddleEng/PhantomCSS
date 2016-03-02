@@ -11,10 +11,15 @@ var _results; // for backwards compatibility results and src are the same - but 
 var _failures = '.' + fs.separator + 'failures';
 
 var _count = 0;
+var _realPath;
+var _currentDirectory = '.';
+var _diffsToProcess = [];
 var exitStatus;
 var _hideElements;
 var _waitTimeout = 60000;
 var _addLabelToFailedImage = true;
+var _test_match;
+var _test_exclude;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings;
 var _cleanupComparisonImages = false;
@@ -56,6 +61,7 @@ function update( options ) {
 	casper = options.casper || casper;
 
 	_waitTimeout = options.waitTimeout || _waitTimeout;
+	_currentDirectory = options.currentDirectory || _currentDirectory;
 
 	_libraryRoot = options.libraryRoot || _libraryRoot || '.';
 
@@ -302,72 +308,152 @@ function removeFile( filepath ) {
 	}
 }
 
+var simplePage = require('webpage');
+
+function decodeImage(imagePath, callback, index) {
+
+	var _sep = fs.separator;
+	var page = simplePage.create();
+	
+	var fileName = _currentDirectory+_sep+_src.replace('.'+_sep,'')+_sep+Math.random().toString(36).substring(7)+'_temp.html';
+
+	imagePath =_currentDirectory+_sep+imagePath.replace('.'+_sep,'');
+	
+    fs.write(fileName, '<html><body><img src="'+imagePath+'"></body></html>','w');
+
+	page.onResourceError = function(err) {
+		// console.log('onResourceError', err.errorString, err.statusText);
+	};
+	
+	page.onConsoleMessage = function(err) {
+		// console.log('onConsoleMessage',err);
+	};
+	
+	var pageManager = function() {
+		var result = this.evaluateJavaScript(function(){
+			var img = document.getElementsByTagName("img")[0];
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+			return canvas.toDataURL("image/png");
+		});
+		callback(result,index);
+		fs.remove(fileName);
+		this.close();
+	}
+
+    page.open(fileName, pageManager);
+}
+
+function ImageDataResolver(images,resolveCb) {
+
+	var manage = {
+		imagesCount:  images.length,
+		resultArr: new Array(images.length),
+		cbCount: 0,
+		resolveCb: resolveCb,
+		imageResolver: function(imgB64Data,index) {
+			this.cbCount++;
+			this.resultArr[index] = imgB64Data;
+			if (this.cbCount == this.imagesCount) {
+				this.resolveCb(this.resultArr);
+				this.resultArr = null;
+			}
+		}
+	};
+	
+	images.forEach(function(image,index){
+		decodeImage(image,manage.imageResolver.bind(manage),index);
+	});
+	
+}
+
 function asyncCompare( one, two, func ) {
 
-	if ( !casper.evaluate( function () {
-			return window._imagediff_;
-		} ) ) {
-		initClient();
-	}
-
-	casper.fillSelectors( 'form#image-diff-form', {
-		'[name=one]': one,
-		'[name=two]': two
-	} );
-
-	casper.evaluate( function ( filename ) {
-		window._imagediff_.run( filename );
-	}, {
-		label: _addLabelToFailedImage ? one : false
-	} );
-
-	casper.waitFor(
-		function check() {
-			return this.evaluate( function () {
-				return window._imagediff_.hasResult;
-			} );
-		},
-		function () {
-
-			var mismatch = casper.evaluate( function () {
-				return window._imagediff_.getResult();
-			} );
-
-			if ( Number( mismatch ) ) {
-				func( false, mismatch );
-			} else {
-				func( true );
-			}
-
-		},
-		function () {
-			func( false );
-		},
-		_waitTimeout
-	);
-}
-
-function getDiffs( root, collection ) {
-	var symDict = { '..': 1, '.': 1};
-	if(!collection) {collection = [];}
-	if ( fs.isDirectory( root ) ) {
-		fs.list( root ).forEach( function(leaf){
-			var newroot = root + fs.separator + leaf;
-			if ( symDict[ leaf ] ) { return true; }
-			getDiffs(newroot, collection);
+	new ImageDataResolver([one,two],function(b64images){
+		
+		if ( !casper.evaluate( function () {return window._imagediff_;} ) ) {
+			initClient(b64images[0],b64images[1]);
+		}
+		
+		casper.page.onError = function(msg, trace) {
+			console.log(msg);
+		};
+	
+		
+		casper.evaluate( function ( filename ) {
+			window._imagediff_.run( filename );
+		}, {
+			label: _addLabelToFailedImage ? one : false
 		} );
-	} else if ( isThisImageADiff( root.toLowerCase() ) ) {
-		collection.push( root );
-	}
-	return collection;
+
+		
+		casper.waitFor(
+			function check() {
+				return this.evaluate( function () {
+					return window._imagediff_.hasResult;
+				} );
+			},
+			function () {
+
+				var mismatch = casper.evaluate( function () {
+					return window._imagediff_.getResult();
+				} );
+
+				if ( Number( mismatch ) ) {
+					func( false, mismatch );
+				} else {
+					func( true );
+				}
+
+			},
+			function () {
+				func( false );
+			},
+			_waitTimeout
+		);
+			
+	});
+
 }
 
-function filterOn(include, exclude){
-	return function(path){
-		var includeAble = (include === void 0) || include.test( path.toLowerCase() );
-		var excludeAble = exclude && exclude.test( path.toLowerCase() );
-		return !excludeAble && includeAble;
+function getDiffs( path ) {
+
+	var filePath;
+
+	if ( ( {
+			'..': 1,
+			'.': 1
+		} )[ path ] ) {
+		return true;
 	}
+
+	if ( _realPath ) {
+		_realPath += fs.separator + path;
+	} else {
+		_realPath = path;
+	}
+
+	filePath = _realPath;
+
+	if ( fs.isDirectory( _realPath ) ) {
+		fs.list( _realPath ).forEach( getDiffs );
+	} else if ( isThisImageADiff( path.toLowerCase() ) ) {
+		if ( _test_match ) {
+			if ( _test_match.test( _realPath.toLowerCase() ) ) {
+				if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
+					console.log( '[PhantomCSS] Analysing ' + _realPath );
+					_diffsToProcess.push( filePath );
+				}
+			}
+		} else if ( !( _test_exclude && _test_exclude.test( _realPath.toLowerCase() ) ) ) {
+			_diffsToProcess.push( filePath );
+		}
+	}
+
+	_realPath = _realPath.replace( fs.separator + path, '' );
 }
 
 function getCreatedDiffFiles() {
@@ -378,7 +464,8 @@ function getCreatedDiffFiles() {
 
 function compareMatched( match, exclude ) {
 	// Search for diff images, but only compare matched filenames
-	compareAll( exclude, void 0, match);
+	_test_match = typeof match === 'string' ? new RegExp( match ) : match;
+	compareAll( exclude );
 }
 
 function compareExplicit( list ) {
@@ -408,7 +495,6 @@ function compareFiles( baseFile, file ) {
 
 		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak bewteen captures)
 		casper.thenOpen( _resembleContainerPath, function () {
-
 			asyncCompare( baseFile, file, function ( isSame, mismatch ) {
 
 				if ( !isSame ) {
@@ -475,32 +561,29 @@ function compareFiles( baseFile, file ) {
 	return test;
 }
 
-function str2RegExp(str){
-	return typeof str === 'string' ? new RegExp( str ) : str;
-}
-
-function compareAll( exclude, diffList, include ) {
+function compareAll( exclude, list ) {
 	var tests = [];
 
-	if ( !diffList ) {
-		diffList = getDiffs( _results );
-		if(exclude || include){
-			diffList = diffList.filter(filterOn( str2RegExp(include), str2RegExp(exclude) ));
-		}
-		//diffList.forEach(function(path){console.log( '[PhantomCSS] Attempting visual comparison of ' + path );})
+	_test_exclude = typeof exclude === 'string' ? new RegExp( exclude ) : exclude;
+
+	if ( list ) {
+		_diffsToProcess = list;
+	} else {
+		_realPath = undefined;
+		getDiffs( _results );
 	}
 
-	diffList.forEach( function ( file ) {
+	_diffsToProcess.forEach( function ( file ) {
 		var baseFile = _replaceDiffSuffix( file );
 		tests.push( compareFiles( baseFile, file ) );
 	} );
-
 	waitForTests( tests );
 }
 
 function waitForTests( tests ) {
 	casper.then( function () {
 		casper.waitFor( function () {
+				// console.log('casper.waitFor( function () {');
 				return tests.length === tests.reduce( function ( count, test ) {
 					if ( test.success || test.fail || test.error ) {
 						return count + 1;
@@ -509,6 +592,7 @@ function waitForTests( tests ) {
 					}
 				}, 0 );
 			}, function () {
+					// console.log('}, function () {');
 				var fails = 0,
 					errors = 0;
 				tests.forEach( function ( test ) {
@@ -526,29 +610,32 @@ function waitForTests( tests ) {
 	} );
 }
 
-function initClient() {
+function initClient(_one,_two) {
 
+	casper.page.onConsoleMessage = function(msg, lineNum, sourceId) {
+	  console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+	};
+
+	casper.page.onError = function(msg, trace) {
+		console.log(msg);
+	};
+	
 	casper.page.injectJs( _resemblePath );
-
-	casper.evaluate( function ( mismatchTolerance, resembleOutputSettings ) {
-
+	
+	casper.evaluate( function ( mismatchTolerance, resembleOutputSettings, one, two ) {
+			
 			var result;
-
 			var div = document.createElement( 'div' );
 
-			// this is a bit of hack, need to get images into browser for analysis
 			div.style = "display:block;position:absolute;border:0;top:10px;left:0;";
-			// div.style = "display:block;position:absolute;border:0;top:0;left:0;height:1px;width:1px;";
-			div.innerHTML = '<form id="image-diff-form">' +
-				'<input type="file" id="image-diff-one" name="one"/>' +
-				'<input type="file" id="image-diff-two" name="two"/>' +
-				'</form><div id="image-diff"></div>';
+
+			div.innerHTML = '<div id="image-diff"></div>';
 			document.body.appendChild( div );
 
 			if ( resembleOutputSettings ) {
 				resemble.outputSettings( resembleOutputSettings );
 			}
-
+			
 			window._imagediff_ = {
 				hasResult: false,
 				hasImage: false,
@@ -561,6 +648,7 @@ function initClient() {
 
 			function run( label ) {
 
+			
 				function render( data ) {
 					var img = new Image();
 
@@ -568,11 +656,13 @@ function initClient() {
 						window._imagediff_.hasImage = true;
 					};
 					document.getElementById( 'image-diff' ).appendChild( img );
+					
 					img.src = data.getImageDataUrl( label );
+
 				}
 
-				resemble( document.getElementById( 'image-diff-one' ).files[ 0 ] ).
-				compareTo( document.getElementById( 'image-diff-two' ).files[ 0 ] ).
+				resemble(one).
+				compareTo(two).
 				ignoreAntialiasing(). // <-- muy importante
 				onComplete( function ( data ) {
 					var diffImage;
@@ -593,8 +683,12 @@ function initClient() {
 			}
 		},
 		_mismatchTolerance,
-		_resembleOutputSettings
+		_resembleOutputSettings,
+		_one,
+		_two
 	);
+		
+	
 }
 
 function _onPass( test ) {
