@@ -59,9 +59,9 @@ function update( options ) {
 
 	_libraryRoot = options.libraryRoot || _libraryRoot || '.';
 
-	_resemblePath = _resemblePath || getResemblePath( _libraryRoot );
+	_resemblePath = _resemblePath || getResemblePath();
 
-	_resembleContainerPath = _resembleContainerPath || ( _libraryRoot + fs.separator + 'resemblejscontainer.html' );
+	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath();
 
 	_src = stripslash( options.screenshotRoot || _src );
 	_results = stripslash( options.comparisonResultRoot || _results || _src );
@@ -109,20 +109,39 @@ function done(){
 	_count = 0;
 }
 
-function getResemblePath( root ) {
+function getResemblePath( ) {
+    var path;
 
-	var path = [ root, 'libs', 'resemblejs', 'resemble.js' ].join( fs.separator );
-	if ( !_isFile( path ) ) {
-		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
-		if ( !_isFile( path ) ) {
-            path = [ root, '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
-            if ( !_isFile( path ) ) {
-    			throw "[PhantomCSS] Resemble.js not found: " + path;
-            }
-		}
-	}
+    require('resemblejs');
+    for(var c in require.cache) {
+        if(/resemblejs/.test(c)) {
+          path = require.cache[c].filename;
+          break;
+        }
+    }
 
-	return path;
+    if(!_isFile(path)) {
+        throw "[PhantomCSS] Resemble.js not found: " + path;
+    }
+
+    return path;
+}
+
+function getResembleContainerPath() {
+    var path;
+
+    for(var c in require.cache) {
+        if(/phantomcss/.test(c)) {
+            path = require.cache[c].filename.replace('phantomcss.js', 'resemblejscontainer.html');
+            break;
+        }
+    }
+
+    if ( !_isFile(path) ) {
+        throw '[PhantomCSS] Can\'t find Resemble container. (' + path + ')';
+    }
+
+    return path;
 }
 
 function turnOffAnimations() {
@@ -399,12 +418,6 @@ function compareFiles( baseFile, file ) {
 	if ( !_isFile( baseFile ) ) {
 		test.error = true;
 	} else {
-
-		if ( !_isFile( _resembleContainerPath ) ) {
-			console.log( '[PhantomCSS] Can\'t find Resemble container. Perhaps the library root is mis configured. (' + _resembleContainerPath + ')' );
-			test.error = true;
-			return;
-		}
 
 		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak bewteen captures)
 		casper.thenOpen( _resembleContainerPath, function () {
