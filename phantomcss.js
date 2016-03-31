@@ -650,22 +650,17 @@ function _onComplete( tests, noOfFails, noOfErrors ) {
 }
 
 function waitAndHideToCapture( target, fileName, hideSelector, timeToWait ) {
+  var srcPath = _fileNameGetter( _src, fileName );
+  var resultPath = srcPath.replace( _src, _results );
 
-	casper.wait( timeToWait || 250, function () {
+  if ( hideSelector || _hideElements ) {
+    casper.evaluate( setVisibilityToHidden, {
+      s1: _hideElements,
+      s2: hideSelector
+    } );
+  }
 
-		var srcPath = _fileNameGetter( _src, fileName );
-		var resultPath = srcPath.replace( _src, _results );
-
-		if ( hideSelector || _hideElements ) {
-			casper.evaluate( setVisibilityToHidden, {
-				s1: _hideElements,
-				s2: hideSelector
-			} );
-		}
-
-		capture( srcPath, resultPath, target );
-
-	} ); // give a bit of time for all the images appear
+  capture( srcPath, resultPath, target );
 }
 
 function setVisibilityToHidden( s1, s2 ) {
