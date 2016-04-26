@@ -57,6 +57,8 @@ PhantomCSS can be downloaded in various ways:
 
 If you are not installing via NPM, you will need to run `npm install` in the PhantomCSS root folder.
 
+Please note that depending on how you have installed PhantomCSS you will need to change the libraryRoot configuration property to link to the directory in which phantomcss.js resides.  
+
 ### Getting started, try the demo
 
 * For convenience I've included CasperJS.bat for Windows users. If you are not a Windows user, you will have to install the latest version of
@@ -82,8 +84,8 @@ If you are using SlimerJS, you will need to specify absolute paths (see 'demo').
 phantomcss.init({
 	/*
 		libraryRoot is relative to this file and must point to your 
-		phantomcss folder (not lib or node_modules). If you are using 
-		NPM, this will be './node_modules/phantomcss'.
+		phantomcss folder. If you are using 
+		NPM, this will probably be './node_modules/phantomcss'.
 	*/
 	libraryRoot: './modules/PhantomCSS',
 	
