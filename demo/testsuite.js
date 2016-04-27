@@ -27,6 +27,7 @@ casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 		rebase: casper.cli.get( "rebase" ),
 		// SlimerJS needs explicit knowledge of this Casper, and lots of absolute paths
 		casper: casper,
+		libraryRoot: fs.absolute( fs.workingDirectory + '' ),
 		screenshotRoot: fs.absolute( fs.workingDirectory + '/screenshots' ),
 		failedComparisonsRoot: fs.absolute( fs.workingDirectory + '/demo/failures' ),
 		addLabelToFailedImage: false,
@@ -34,6 +35,7 @@ casper.test.begin( 'Coffee machine visual tests', function ( test ) {
 		screenshotRoot: '/screenshots',
 		failedComparisonsRoot: '/failures'
 		casper: specific_instance_of_casper,
+		libraryRoot: '/phantomcss',
 		fileNameGetter: function overide_file_naming(){},
 		onPass: function passCallback(){},
 		onFail: function failCallback(){},

@@ -57,6 +57,8 @@ PhantomCSS can be downloaded in various ways:
 
 If you are not installing via NPM, you will need to run `npm install` in the PhantomCSS root folder.
 
+Please note that depending on how you have installed PhantomCSS you may need to set the libraryRoot configuration property to link to the directory in which phantomcss.js resides.
+
 ### Getting started, try the demo
 
 * For convenience I've included CasperJS.bat for Windows users. If you are not a Windows user, you will have to install the latest version of [CasperJS](http://docs.casperjs.org/en/latest/installation.html).
@@ -81,12 +83,20 @@ If you are using SlimerJS, you will need to specify absolute paths (see 'demo').
 ```javascript
 phantomcss.init({
 
-    captureWaitEnabled: true,
     /*
-    Defaults to true, setting to false will remove a small wait/delay on each
+    captureWaitEnabled defaults to true, setting to false will remove a small wait/delay on each
     screenshot capture - useful when you don't need to worry about
     animations and latency in your visual tests
     */
+    captureWaitEnabled: true,
+
+	/*
+		libraryRoot is now optional unless you are using SlimerJS where
+		you will need to set it to the correct path. It must point to
+		your phantomcss folder. If you are using NPM, this will probably
+		be './node_modules/phantomcss'.
+	*/
+	libraryRoot: './modules/PhantomCSS',
 
 	screenshotRoot: './screenshots',
 

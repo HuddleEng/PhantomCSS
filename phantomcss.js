@@ -22,6 +22,7 @@ var diffsCreated = [];
 
 var _resemblePath;
 var _resembleContainerPath;
+var _libraryRoot;
 var _rebase = false;
 var _prefixCount = false;
 var _isCount = true;
@@ -58,9 +59,11 @@ function update( options ) {
 
 	_waitTimeout = options.waitTimeout || _waitTimeout;
 
-	_resemblePath = _resemblePath || getResemblePath();
+	_libraryRoot = options.libraryRoot;
 
-	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath();
+	_resemblePath = _resemblePath || getResemblePath( _libraryRoot );
+
+	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath( _libraryRoot );
 
 	_src = stripslash( options.screenshotRoot || _src );
 	_results = stripslash( options.comparisonResultRoot || _results || _src );
@@ -114,33 +117,45 @@ function done(){
 	_count = 0;
 }
 
-function getResemblePath( ) {
+function getResemblePath( root ) {
     var path;
 
-    require('resemblejs');
-    for(var c in require.cache) {
-        if(/resemblejs/.test(c)) {
-          path = require.cache[c].filename;
-          break;
-        }
-    }
+	if(root){
+		path = [ './', 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
+		if ( !_isFile( path ) ) {
+			path = [ './', '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
+		}
+	} else {
+		require('resemblejs');
+		for(var c in require.cache) {
+			if(/resemblejs/.test(c)) {
+				path = require.cache[c].filename;
+				break;
+			}
+		}
+	}
 
-    if(!_isFile(path)) {
-        throw "[PhantomCSS] Resemble.js not found: " + path;
-    }
+	if ( !_isFile( path ) ) {
+		throw "[PhantomCSS] Resemble.js not found: " + path;
+	}
 
     return path;
 }
 
-function getResembleContainerPath() {
+
+function getResembleContainerPath(root) {
     var path;
 
-    for(var c in require.cache) {
-        if(/phantomcss/.test(c)) {
-            path = require.cache[c].filename.replace('phantomcss.js', 'resemblejscontainer.html');
-            break;
-        }
-    }
+	if(root){
+		path = root + fs.separator + 'resemblejscontainer.html';
+	} else {
+		for (var c in require.cache) {
+			if (/phantomcss/.test(c)) {
+				path = require.cache[c].filename.replace('phantomcss.js', 'resemblejscontainer.html');
+				break;
+			}
+		}
+	}
 
     if ( !_isFile(path) ) {
         throw '[PhantomCSS] Can\'t find Resemble container. (' + path + ')';
