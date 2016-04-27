@@ -61,7 +61,7 @@ Please note that depending on how you have installed PhantomCSS you will need to
 
 ### Getting started, try the demo
 
-* For convenience I've included CasperJS.bat for Windows users. If you are not a Windows user, you will have to install the latest version of
+* For convenience I've included CasperJS.bat for Windows users. If you are not a Windows user, you will have to install the latest version of [CasperJS](http://docs.casperjs.org/en/latest/installation.html).
 * Download or clone this repo and run `casperjs test demo/testsuite.js` in command/terminal from the PhantomCSS folder.  PhantomJS is the only binary dependency - this should just work
 * Find the screenshot folder and have a look at the (baseline) images
 * Run the tests again with `casperjs test demo/testsuite.js`. New screenshots will be created to compare against the baseline images. These new images can be ignored, they will be replaced every test run.
