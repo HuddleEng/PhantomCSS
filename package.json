@@ -1,6 +1,6 @@
 {
 	"name": "phantomcss",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A CasperJS module for automating visual regression testing of Web apps, live style guides and responsive layouts.",
 	"repository": {
 		"type": "git",

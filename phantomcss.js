@@ -22,7 +22,6 @@ var diffsCreated = [];
 
 var _resemblePath;
 var _resembleContainerPath;
-var _libraryRoot;
 var _rebase = false;
 var _prefixCount = false;
 var _isCount = true;
@@ -30,6 +29,8 @@ var _isCount = true;
 var _baselineImageSuffix = "";
 var _diffImageSuffix = ".diff";
 var _failureImageSuffix = ".fail";
+
+var _captureWaitEnabled = true;
 
 exports.screenshot = screenshot;
 exports.compareAll = compareAll;
@@ -57,8 +58,6 @@ function update( options ) {
 
 	_waitTimeout = options.waitTimeout || _waitTimeout;
 
-	_libraryRoot = options.libraryRoot || _libraryRoot || '.';
-
 	_resemblePath = _resemblePath || getResemblePath();
 
 	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath();
@@ -82,7 +81,7 @@ function update( options ) {
 
 	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
 
-	_rebase = typeof options.rebase !== 'undefined' ? options.rebase : _rebase;
+	_rebase = isNotUndefined(options.rebase) ? options.rebase : _rebase;
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
@@ -92,6 +91,8 @@ function update( options ) {
 	_diffImageSuffix = options.diffImageSuffix || _diffImageSuffix;
 	_failureImageSuffix = options.failureImageSuffix || _failureImageSuffix;
 
+	_captureWaitEnabled = isNotUndefined(options.captureWaitEnabled) ? options.captureWaitEnabled : _captureWaitEnabled;
+
 	if ( options.addLabelToFailedImage !== undefined ) {
 		_addLabelToFailedImage = options.addLabelToFailedImage;
 	}
@@ -99,6 +100,10 @@ function update( options ) {
 	if ( _cleanupComparisonImages ) {
 		_results += fs.separator + generateRandomString();
 	}
+}
+
+function isNotUndefined(val){
+	return val !== void 0;
 }
 
 function init( options ) {
@@ -663,17 +668,24 @@ function _onComplete( tests, noOfFails, noOfErrors ) {
 }
 
 function waitAndHideToCapture( target, fileName, hideSelector, timeToWait ) {
-  var srcPath = _fileNameGetter( _src, fileName );
-  var resultPath = srcPath.replace( _src, _results );
+	var srcPath = _fileNameGetter( _src, fileName );
+	var resultPath = srcPath.replace( _src, _results );
 
-  if ( hideSelector || _hideElements ) {
-    casper.evaluate( setVisibilityToHidden, {
-      s1: _hideElements,
-      s2: hideSelector
-    } );
-  }
+	function runCapture() {
+		if ( hideSelector || _hideElements ) {
+			casper.evaluate( setVisibilityToHidden, {
+				s1: _hideElements,
+				s2: hideSelector
+			} );
+		}
 
-  capture( srcPath, resultPath, target );
+		capture( srcPath, resultPath, target );
+	}
+	if(_captureWaitEnabled) {
+		casper.wait(timeToWait || 250, runCapture); // give a bit of time for all the images appear
+	} else {
+		runCapture();
+	}
 }
 
 function setVisibilityToHidden( s1, s2 ) {
