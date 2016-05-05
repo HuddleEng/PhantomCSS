@@ -121,9 +121,9 @@ function getResemblePath( root ) {
     var path;
 
 	if(root){
-		path = [ './', 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
+		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
 		if ( !_isFile( path ) ) {
-			path = [ './', '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
+			path = [ root, '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
 		}
 	} else {
 		require('resemblejs');
