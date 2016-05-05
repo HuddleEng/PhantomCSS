@@ -439,8 +439,8 @@ function compareFiles( baseFile, file ) {
 		test.error = true;
 	} else {
 
-		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak bewteen captures)
-		casper.thenOpen( _resembleContainerPath, function () {
+		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak between captures)
+		casper.thenOpen( 'file:///' + _resembleContainerPath, function () {
 
 			asyncCompare( baseFile, file, function ( isSame, mismatch ) {
 
