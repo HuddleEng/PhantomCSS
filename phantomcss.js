@@ -121,9 +121,9 @@ function getResemblePath( root ) {
     var path;
 
 	if(root){
-		path = [ './', 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
+		path = [ root, 'node_modules', 'resemblejs', 'resemble.js' ].join( fs.separator );
 		if ( !_isFile( path ) ) {
-			path = [ './', '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
+			path = [ root, '..', 'resemblejs', 'resemble.js' ].join( fs.separator );
 		}
 	} else {
 		require('resemblejs');
@@ -439,8 +439,8 @@ function compareFiles( baseFile, file ) {
 		test.error = true;
 	} else {
 
-		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak bewteen captures)
-		casper.thenOpen( _resembleContainerPath, function () {
+		casper.thenOpen( 'about:blank', function () {}); // reset page (fixes bug where failure screenshots leak between captures)
+		casper.thenOpen( 'file:///' + _resembleContainerPath, function () {
 
 			asyncCompare( baseFile, file, function ( isSame, mismatch ) {
 
