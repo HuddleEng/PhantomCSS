@@ -368,7 +368,7 @@ Below is an example of a false-negative caused by antialiasing differences on di
 
 ##### Scaling visual regression testing with Git
 
-If your using a version control system like Git to store the baseline screenshots the repository size becomes increasingly relevant as your test suite grows.  I'd recommend using a tool like https://github.com/joeyh/git-annex or https://github.com/schacon/git-media to store the images outside of the repo.
+If you're using a version control system like Git to store the baseline screenshots the repository size becomes increasingly relevant as your test suite grows.  I'd recommend using a tool like https://github.com/joeyh/git-annex or https://github.com/schacon/git-media to store the images outside of the repo.
 
 ### ...You might also be interested in
 
