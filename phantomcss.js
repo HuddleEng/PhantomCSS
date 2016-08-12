@@ -66,7 +66,7 @@ function update( options ) {
 	_resembleContainerPath = _resembleContainerPath || getResembleContainerPath( _libraryRoot );
 
 	_src = stripslash( options.screenshotRoot || _src );
-	_results = stripslash( options.comparisonResultRoot || _results || _src );
+	_results = stripslash( options.comparisonResultRoot || options.screenshotRoot || _results || _src );
 	_failures = options.failedComparisonsRoot === false ? false : stripslash( options.failedComparisonsRoot || _failures );
 
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
