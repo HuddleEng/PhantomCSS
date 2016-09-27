@@ -16,7 +16,7 @@ var _hideElements;
 var _waitTimeout = 60000;
 var _addLabelToFailedImage = true;
 var _mismatchTolerance = 0.05;
-var _resembleOutputSettings;
+var _resembleOutputSettings = {};
 var _cleanupComparisonImages = false;
 var diffsCreated = [];
 
@@ -87,6 +87,8 @@ function update( options ) {
 	_rebase = isNotUndefined(options.rebase) ? options.rebase : _rebase;
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
+
+	_resembleOutputSettings.useCrossOrigin=false; // turn off x-origin attr in Resemble to support SlimerJS 
 
 	_cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
 
