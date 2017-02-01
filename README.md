@@ -188,8 +188,7 @@ phantomcss.init({
 	prefixCount: true,
 
 	/*
-		Output styles for image failure outputs genrated by 
-		Resemble.js
+		Output styles for image failure outputs genrated by Resemble.js
 	*/
 	outputSettings: {
 		errorColor: {
