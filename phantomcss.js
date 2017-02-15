@@ -474,7 +474,6 @@ function compareFiles( baseFile, file ) {
 								casper.captureSelector( failFile, 'img' );
 
 								test.failFile = failFile;
-								console.log( 'Failure! Saved to ' + failFile );
 							}
 
 							if ( file.indexOf( _diffImageSuffix + '.png' ) !== -1 ) {
@@ -634,12 +633,14 @@ function initClient() {
 
 function _onPass( test ) {
 	console.log( '\n' );
-	casper.test.pass( 'No changes found for screenshot ' + test.filename );
+	var name = 'Should look the same ' + test.filename;
+	casper.test.pass(name, {name: name});
 }
 
 function _onFail( test ) {
-	console.log( '\n' );
-	casper.test.fail( 'Visual change found for screenshot ' + test.filename + ' (' + test.mismatch + '% mismatch)' );
+	console.log('\n');
+	var name = 'Should look the same ' + test.filename;
+	casper.test.fail(name, {name:name, message: 'Looks different (' + test.mismatch + '% mismatch) ' + test.failFile });
 }
 
 function _onTimeout( test ) {
