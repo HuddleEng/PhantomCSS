@@ -35,7 +35,7 @@ From the command line/terminal run:
 
 or
 
-* `casperjs test demo/testsuite.js --verbose --log-level=debug`
+* `casperjs test demo/testsuite.js --verbose --log-level=debug --xunit=results.xml`
 
 ### Warning
 
