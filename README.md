@@ -37,15 +37,12 @@ or
 
 * `casperjs test demo/testsuite.js --verbose --log-level=debug --xunit=results.xml`
 
-### Warning
-
-This project is currently tracking the HEAD of the [CasperJS master branch](https://github.com/n1k0/casperjs) to enable [Phantomjs 2](http://phantomjs.org/) support.
-If you are unable to lock down your dependency chain, or would rather use a more stable version of PhantomCSS, please see the [v0 branch](https://github.com/Huddle/PhantomCSS/tree/v0);
-
 ### Updating from PhantomCSS v0 to v1
 
 Rendering is quite different with PhantomJS 2, so when you update, old visual tests will start failing.
 If you're tests are green and passing before updating, I would recommend rebasing the visual tests, i.e. delete them, and run the test suite to create a new baseline.
+
+You can still use the [v0 branch](https://github.com/Huddle/PhantomCSS/tree/v0) if you wish, though it now unmaintained.
 
 ### Download
 
