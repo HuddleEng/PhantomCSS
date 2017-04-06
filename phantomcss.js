@@ -72,7 +72,7 @@ function update( options ) {
 	_fileNameGetter = options.fileNameGetter || _fileNameGetter;
 
 	_prefixCount = options.prefixCount || _prefixCount;
-	_isCount = ( options.addIteratorToImage !== false );
+	_isCount = options.isCount || ( options.addIteratorToImage !== false );
 
 	_onPass = options.onPass || _onPass;
 	_onFail = options.onFail || _onFail;
