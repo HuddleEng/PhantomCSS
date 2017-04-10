@@ -175,6 +175,11 @@ function turnOffAnimations() {
 			if ( jQuery ) {
 				jQuery.fx.off = true;
 			}
+			var webshim = window.webshim;
+			jQuery = webshim && webshim.$;
+			if ( jQuery ) {
+				jQuery.fx.off = true;
+			}
 
 			var css = document.createElement( "style" );
 			css.type = "text/css";
