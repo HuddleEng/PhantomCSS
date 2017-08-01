@@ -39,7 +39,7 @@ or
 ### Updating from PhantomCSS v0 to v1
 
 Rendering is quite different with PhantomJS 2, so when you update, old visual tests will start failing.
-If you're tests are green and passing before updating, I would recommend rebasing the visual tests, i.e. delete them, and run the test suite to create a new baseline.
+If your tests are green and passing before updating, I would recommend rebasing the visual tests, i.e. delete them, and run the test suite to create a new baseline.
 
 You can still use the [v0 branch](https://github.com/Huddle/PhantomCSS/tree/v0) if you wish, though it now unmaintained.
 
