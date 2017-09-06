@@ -82,7 +82,7 @@ function update( options ) {
 
 	_hideElements = options.hideElements;
 
-	_mismatchTolerance = options.mismatchTolerance || _mismatchTolerance;
+	_mismatchTolerance = isNaN(options.mismatchTolerance) ? _mismatchTolerance : options.mismatchTolerance;
 
 	_rebase = isNotUndefined(options.rebase) ? options.rebase : _rebase;
 
