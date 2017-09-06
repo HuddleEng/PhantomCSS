@@ -610,16 +610,17 @@ function initClient() {
 				ignoreAntialiasing(). // <-- muy importante
 				onComplete( function ( data ) {
 					var diffImage;
+					var misMatchPercentage = mismatchTolerance < 0.01 ? data.rawMisMatchPercentage : data.misMatchPercentage;
 
-					if ( Number( data.misMatchPercentage ) > mismatchTolerance ) {
-						result = data.misMatchPercentage;
+					if ( Number( misMatchPercentage ) > mismatchTolerance ) {
+						result = misMatchPercentage;
 					} else {
 						result = false;
 					}
 
 					window._imagediff_.hasResult = true;
 
-					if ( Number( data.misMatchPercentage ) > mismatchTolerance ) {
+					if ( Number( misMatchPercentage ) > mismatchTolerance ) {
 						render( data );
 					}
 
