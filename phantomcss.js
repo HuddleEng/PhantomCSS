@@ -18,6 +18,7 @@ var _addLabelToFailedImage = true;
 var _mismatchTolerance = 0.05;
 var _resembleOutputSettings = {};
 var _cleanupComparisonImages = false;
+var _failOnCaptureError = false;
 var diffsCreated = [];
 
 var _resemblePath;
@@ -79,6 +80,9 @@ function update( options ) {
 	_onTimeout = options.onTimeout || _onTimeout;
 	_onNewImage = options.onNewImage || _onNewImage;
 	_onComplete = options.onComplete || options.report || _onComplete;
+	_onCaptureFail = options.onCaptureFail || _onCaptureFail;
+
+	_failOnCaptureError = options.failOnCaptureError || _failOnCaptureError;
 
 	_hideElements = options.hideElements;
 
@@ -88,7 +92,7 @@ function update( options ) {
 
 	_resembleOutputSettings = options.outputSettings || _resembleOutputSettings;
 
-	_resembleOutputSettings.useCrossOrigin=false; // turn off x-origin attr in Resemble to support SlimerJS 
+	_resembleOutputSettings.useCrossOrigin=false; // turn off x-origin attr in Resemble to support SlimerJS
 
 	_cleanupComparisonImages = options.cleanupComparisonImages || _cleanupComparisonImages;
 
@@ -312,7 +316,7 @@ function capture( srcPath, resultPath, target ) {
 		}
 
 	} catch ( ex ) {
-		console.log( "[PhantomCSS] Screenshot capture failed: " + ex.message );
+		_onCaptureFail(ex, target)
 	}
 }
 
@@ -635,6 +639,14 @@ function _onPass( test ) {
 	console.log( '\n' );
 	var name = 'Should look the same ' + test.filename;
 	casper.test.pass(name, {name: name});
+}
+
+function _onCaptureFail( ex, target ) {
+	console.log( "[PhantomCSS] Screenshot capture failed: " + ex.message );
+	if (_failOnCaptureError) {
+		var name = 'Capture screenshot ' + target;
+		casper.test.fail(name, {name:name, message: 'Failed to capture ' + target + ' - ' + ex.message });
+	}
 }
 
 function _onFail( test ) {
