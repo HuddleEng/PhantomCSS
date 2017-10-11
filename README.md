@@ -162,6 +162,8 @@ phantomcss.init({
 		});
 	},
 
+	onCaptureFail: function(ex, target) { console.log('Capture of ' + target + ' failed due to ' + ex.message); }
+
 	/*
 		Change the output screenshot filenames for your specific 
 		integration
@@ -201,7 +203,12 @@ phantomcss.init({
 		images without manually deleting the files
 		casperjs demo/test.js --rebase
 	*/
-	rebase: casper.cli.get("rebase")
+	rebase: casper.cli.get("rebase"),
+
+	/*
+		If true, test will fail when captures fail (e.g. no element matching selector).
+	 */
+	failOnCaptureError: false
 });
 
 /*
