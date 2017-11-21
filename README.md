@@ -387,7 +387,7 @@ Also, take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for stubb
 
 ### Why is this project no longer maintained
 
-The introduction of [headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) has simply meant that PhantomJS is no longer the best tool for running browser tests.  Huddle is making efforts to move away from PhantomJS based testing, largly to gain better coverage of new browser features such as CSS grid. Interestingly there still doesn't seem to be a straight replacement for PhantomCSS for Chrome, perhaps because it is now far easier to roll-your-own VRT suite. The Huddle development team is now actively looking into using Docker containers for running Mocha/Chai test suites against headless Chrome, using [Resemblejs](https://github.com/Huddle/Resemble.js) directly in NodeJS for image comparison.
+The introduction of [headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) has simply meant that PhantomJS is no longer the best tool for running browser tests.  Huddle is making efforts to move away from PhantomJS based testing, largely to gain better coverage of new browser features such as CSS grid. Interestingly there still doesn't seem to be a straight replacement for PhantomCSS for Chrome, perhaps because it is now far easier to roll-your-own VRT suite. The Huddle development team is now actively looking into using Docker containers for running Mocha/Chai test suites against headless Chrome, using [Resemblejs](https://github.com/Huddle/Resemble.js) directly in NodeJS for image comparison.
 
 ### Huddle Careers
 
