@@ -1,8 +1,15 @@
-**Huddle is Hiring!** [We're looking for talented front-end engineers](https://talentcommunity.huddle.com/careers)
+
+**Unmaintained notice**: As of December 22nd 2017 this project will no longer be maintained.  It's been a fantastic five years, a project that has hopefully had a positive influence on the shape and extent of Web UI testing. Read more on [why its time to move on](https://github.com/Huddle/PhantomCSS#why-is-this-project-no-longer-maintained).
+
+
+---
+
 
 <img title="PhantomCSS" alt="Cute image of a ghost" width="200px" src="https://raw.github.com/Huddle/PhantomCSS/master/readme_assets/Phantom CSS.png">
 
 **CSS regression testing**. A [CasperJS](http://github.com/n1k0/casperjs) module for automating visual regression testing with [PhantomJS 2](http://github.com/ariya/phantomjs/) or [SlimerJS](http://slimerjs.org/) and [Resemble.js](http://huddle.github.com/Resemble.js/). For testing Web apps, live style guides and responsive layouts. Read more on Huddle's Engineering blog: [CSS Regression Testing](http://tldr.huddle.com/blog/css-testing/).
+
+**Huddle is Hiring!** [We're looking for talented front-end engineers](https://talentcommunity.huddle.com/careers)
 
 ### What?
 
@@ -377,6 +384,10 @@ If you're using a version control system like Git to store the baseline screensh
 **[PhantomFlow](https://github.com/Huddle/PhantomFlow)** and **[grunt-phantomflow](https://github.com/Huddle/grunt-testflow)** wrap PhantomCSS and provides an experimental way of describing and visualising user flows through tests with CasperJS. As well as providing a terse readable structure for UI testing, it also produces intriguing graph visualisations that can be used to present PhantomCSS screenshots and failed diffs.  We're actively using it at Huddle and it's changing the way we think about UI for the better.
 
 Also, take a look at [PhantomXHR](http://github.com/Huddle/PhantomXHR) for stubbing and mocking XHR requests. Isolated UI testing IS THE FUTURE!
+
+### Why is this project no longer maintained
+
+The introduction of [headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) has simply meant that PhantomJS is no longer the best tool for running browser tests.  Huddle is making efforts to move away from PhantomJS based testing, largly to gain better coverage of new browser features such as CSS grid. Interestingly there still doesn't seem to be a straight replacement for PhantomCSS for Chrome, perhaps because it is now far easier to roll-your-own VRT suite. The Huddle development team is now actively looking into using Docker containers for running Mocha/Chai test suites against headless Chrome, using [Resemblejs](https://github.com/Huddle/Resemble.js) directly in NodeJS for image comparison.
 
 ### Huddle Careers
 
