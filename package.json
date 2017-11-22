@@ -21,8 +21,8 @@
 		"url": "https://github.com/Huddle/PhantomCSS/issues"
 	},
 	"dependencies": {
-		"phantomjs-prebuilt": "^2.1.4",
-		"casperjs": "^1.1.2",
-		"resemblejs": "^2.2.2"
+		"casperjs": "^1.1.4",
+		"phantomjs-prebuilt": "^2.1.16",
+		"resemblejs": "^2.5.0"
 	}
 }
